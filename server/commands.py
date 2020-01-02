@@ -4934,6 +4934,26 @@ def ooc_cmd_time12(client: ClientManager.Client, arg: str):
 
     client.send_ooc(time.strftime('%a %b %e %I:%M:%S %p (%z) %Y'))
 
+def ooc_cmd_time_est(client, arg):
+    """
+    Return the current server date and time in Eastern Standard Time.
+
+    SYNTAX
+    /time_est
+
+    PARAMETERS
+    None
+
+    EXAMPLES
+    /time_est         :: May return something like "Sat Apr 27 09:04:47 AM 2019"
+    """
+
+    if len(arg) != 0:
+        raise ArgumentError('This command has no arguments.')
+
+    client.send_ooc((datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+).strftime("%a %b %e %I:%M:%S %p %Y"))
+
 def ooc_cmd_timer(client: ClientManager.Client, arg: str):
     """
     Start a timer.
