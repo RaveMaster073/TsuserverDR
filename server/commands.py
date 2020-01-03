@@ -22,6 +22,7 @@ import random
 import hashlib
 import string
 import time
+import datetime
 import traceback
 
 from server import logger
@@ -4951,8 +4952,9 @@ def ooc_cmd_time_est(client, arg):
     if len(arg) != 0:
         raise ArgumentError('This command has no arguments.')
 
-    client.send_ooc((datetime.datetime.utcnow() - datetime.timedelta(hours=5)
-).strftime("%a %b %e %I:%M:%S %p %Y"))
+    est = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+
+    client.send_ooc(est.strftime("%a %b %e %I:%M:%S %p %Y"))
 
 def ooc_cmd_timer(client: ClientManager.Client, arg: str):
     """
