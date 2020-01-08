@@ -1004,7 +1004,6 @@ class ClientManager:
             info += '\n*Is Using: {0[0]} {0[1]}'.format(self.version)
             info += ('\n*Online for: {}. Last active: {}'
                      .format(Constants.time_elapsed(self.joined), self.last_active))
-            
             return info
 
         @property
