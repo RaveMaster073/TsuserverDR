@@ -4953,7 +4953,6 @@ def ooc_cmd_time_est(client, arg):
         raise ArgumentError('This command has no arguments.')
 
     est = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
-
     client.send_ooc(est.strftime("%a %b %e %I:%M:%S %p %Y"))
 
 def ooc_cmd_timer(client: ClientManager.Client, arg: str):
