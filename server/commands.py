@@ -4869,6 +4869,29 @@ def ooc_cmd_sneak(client: ClientManager.Client, arg: str):
                                .format(client.name, c.displayname, c.area.id), not_to={c},
                                is_zstaff=True)
 
+def ooc_cmd_spectate(client: ClientManager.Client, arg):
+    """
+    Switches current user's character to the SPECTATOR character.
+
+    SYNTAX
+    /spectate
+
+    PARAMETERS
+    None
+
+    EXAMPLES
+    /spectate                       ::Returns "You are now spectating."
+    """
+
+    if len(arg) != 0:
+        client.send_ooc('This command has no arguments.')
+
+    # Change the character to SPECTATOR
+    client.change_character(-1, client.is_mod)
+    client.send_ooc('You are now spectating.')
+
+
+
 def ooc_cmd_st(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
     Send a message to the private server-wide staff chat. Only staff members can send and receive
