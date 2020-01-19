@@ -193,7 +193,7 @@ Additional notes are listed at the end of the command list.
 * **showname_areas**
     - Similar to /getareas, but lists shownames along with character names.
 * **spectate**
-    - Switches you to a SPECTATOR.
+    - Switches you to a SPECTATOR character.
 * **switch** "character name"
     - Switches you to the given character.
 * **time**

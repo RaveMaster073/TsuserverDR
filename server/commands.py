@@ -4876,7 +4876,7 @@ def ooc_cmd_sneak(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_spectate(client: ClientManager.Client, arg):
     """
-    Switches current user's character to the SPECTATOR character.
+    Switches user's current character to the SPECTATOR character.
     Returns an error if their character is already a SPECTATOR.
 
     SYNTAX
@@ -4887,6 +4887,7 @@ def ooc_cmd_spectate(client: ClientManager.Client, arg):
 
     EXAMPLES
     /spectate                       ::Returns "You are now spectating."
+					or "You are already spectating."
     """
 
     if len(arg) != 0:
