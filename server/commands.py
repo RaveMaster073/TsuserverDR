@@ -4891,8 +4891,10 @@ def ooc_cmd_spectate(client: ClientManager.Client, arg):
     if len(arg) != 0:
         client.send_ooc('This command has no arguments.')
 
+    # If user is already SPECTATOR, no need to change.
     if client.char_id == -1:
         raise ClientError('You are already spectating.')
+    
     # Change the character to SPECTATOR
     client.change_character(-1)
     client.send_ooc('You are now spectating.')
