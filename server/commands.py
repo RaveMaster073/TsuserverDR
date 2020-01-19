@@ -220,11 +220,13 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
                                is_staff=True)
 
     # Every area that was locked before the reload gets warned that their areas were unlocked.
-    for area in old_locked_areas:
+    for area_name in old_locked_areas:
         try:
-            areas = client.server.area_manager.get_area_by_name(area)
-            areas.broadcast_ooc('This area became unlocked after the area reload. Please relock it using /lock.')
-        #if no area is found with that name, nothing happens.
+            area = client.server.area_manager.get_area_by_name(area_name)
+            area.broadcast_ooc('This area became unlocked after the area reload. Relock it using '
+			                   '/lock.')
+        # if no area is found with that name, then an old locked area does not exist anymore, so 
+        # we do not need to do anything.
         except AreaError:
             pass
 
