@@ -562,12 +562,22 @@ class ClientChangeArea:
         client.send_command('HP', 2, client.area.hp_pro)
         client.send_command('BN', client.area.background)
         client.send_command('LE', *client.area.get_evidence_list(client))
+        client.send_ic(msg='', bypass_replace=True) # Blankpost to simulate area change
 
         if client.followedby and not ignore_followers and not override_all:
             for c in client.followedby:
                 c.follow_area(area)
 
         client.reload_music_list() # Update music list to include new area's reachable areas
+        # If new area has lurk callout timer, reset it to that, provided it makes sense
+        if client.area.lurk_length > 0 and client.char_id >= 0 and not client.is_staff():
+            client.server.tasker.create_task(client, ['as_lurk', client.area.lurk_length])
+        else: # Otherwise, cancel any existing lurk timer, if there exists one
+            try:
+                client.server.tasker.remove_task(client, ['as_lurk'])
+            except KeyError:
+                pass
+
         client.server.tasker.create_task(client, ['as_afk_kick', area.afk_delay, area.afk_sendto])
         # Try and restart handicap if needed
         try:

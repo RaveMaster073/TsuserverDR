@@ -193,7 +193,7 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
 
     # lists which areas are locked before the reload
     old_locked_areas = [area.name for area in client.server.area_manager.areas if area.is_locked]
-    
+
     if not arg:
         client.server.area_manager.load_areas()
         client.send_ooc('You have restored the original area list of the server.')
@@ -225,7 +225,7 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
             area = client.server.area_manager.get_area_by_name(area_name)
             area.broadcast_ooc('This area became unlocked after the area reload. Relock it using '
 			                   '/lock.')
-        # if no area is found with that name, then an old locked area does not exist anymore, so 
+        # if no area is found with that name, then an old locked area does not exist anymore, so
         # we do not need to do anything.
         except AreaError:
             pass
@@ -2815,10 +2815,13 @@ def ooc_cmd_logout(client: ClientManager.Client, arg: str):
     if client.area.evidence_mod == 'HiddenCM':
         client.area.broadcast_evidence_list()
 
-    # Update the music list to show reachable areas and activate the AFK timer
+    # Update the music list to show reachable areas, activate the AFK timer
+    # and lurk callout if there is one
     client.reload_music_list()
     client.server.tasker.create_task(client, ['as_afk_kick', client.area.afk_delay,
                                               client.area.afk_sendto])
+    if client.area.lurk_length > 0 and client.char_id >= 0:
+        client.server.tasker.create_task(client, ['as_lurk', client.area.lurk_length])
 
     # If using a character restricted in the area, switch out
     if client.get_char_name() in client.area.restricted_chars:
@@ -4874,7 +4877,7 @@ def ooc_cmd_sneak(client: ClientManager.Client, arg: str):
                                .format(client.name, c.displayname, c.area.id), not_to={c},
                                is_zstaff=True)
 
-def ooc_cmd_spectate(client: ClientManager.Client, arg):
+def ooc_cmd_spectate(client: ClientManager.Client, arg: str):
     """
     Switches user's current character to the SPECTATOR character.
     Returns an error if their character is already a SPECTATOR.
@@ -4886,22 +4889,18 @@ def ooc_cmd_spectate(client: ClientManager.Client, arg):
     None
 
     EXAMPLES
-    /spectate                       ::Returns "You are now spectating."
-					or "You are already spectating."
+    /spectate                       :: Returns "You are now spectating."
     """
 
-    if len(arg) != 0:
-        client.send_ooc('This command has no arguments.')
+    Constants.assert_command(client, arg, parameters='=0')
 
     # If user is already SPECTATOR, no need to change.
     if client.char_id == -1:
         raise ClientError('You are already spectating.')
-    
+
     # Change the character to SPECTATOR
     client.change_character(-1)
     client.send_ooc('You are now spectating.')
-
-
 
 def ooc_cmd_st(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
@@ -6546,9 +6545,9 @@ def ooc_cmd_lurk(client: ClientManager.Client, arg: str):
     lurk_length = Constants.parse_time_length(arg) # Also internally validates
     client.area.lurk_length = lurk_length
 
-    targets = [c for c in client.area if not c.is_staff() and c.char_id >= 0]
+    targets = [c for c in client.area.clients if not c.is_staff() and c.char_id >= 0]
     for target in targets:
-        client.server.tasker_create_task(target, ['as_lurk', lurk_length])
+        client.server.tasker.create_task(target, ['as_lurk', lurk_length])
 
     client.send_ooc('(X) You have enabled a lurk callout timer of length {} seconds in this area.'
                     .format(lurk_length))
@@ -6560,7 +6559,7 @@ def ooc_cmd_lurk(client: ClientManager.Client, arg: str):
                            .format(client.name, lurk_length, client.area.name, client.area.id),
                            is_zstaff_flex=True, in_area=False)
 
-def ooc_cnd_lurk_cancel(client: ClientManager.Client, arg: str):
+def ooc_cmd_lurk_cancel(client: ClientManager.Client, arg: str):
     Constants.assert_command(client, arg, is_staff=True)
 
     if client.area.lurk_length == 0:
@@ -6572,6 +6571,13 @@ def ooc_cnd_lurk_cancel(client: ClientManager.Client, arg: str):
     client.send_ooc_others('(X) {} has canceled the lurk callout timer in area {} ({}).'
                            .format(client.name, client.area.name, client.area.id),
                            is_zstaff_flex=True, in_area=False)
+
+    # Cancel all clients who have active lurk callout timers in the area
+    for target in client.area.clients:
+        try:
+            client.server.tasker.remove_task(client, ['as_lurk'])
+        except KeyError:
+            pass
 
 def ooc_cmd_exec(client: ClientManager.Client, arg: str):
     """
