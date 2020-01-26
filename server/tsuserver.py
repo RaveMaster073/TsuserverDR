@@ -260,6 +260,7 @@ class TsuserverDR:
                              'blackout_background': 'Blackout_HD',
                              'default_area_description': 'No description.',
                              'party_lights_timeout': 10,
+                             'show_ms2-prober': True,
                              'showname_max_length': 30,
                              'sneak_handicap': 5,
                              'spectator_name': 'SPECTATOR',
