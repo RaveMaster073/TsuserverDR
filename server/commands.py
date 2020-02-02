@@ -4683,8 +4683,8 @@ def ooc_cmd_showname_nuke(client: ClientManager.Client, arg: str):
             c.change_showname('')
 
     client.send_ooc('You have nuked all shownames.')
-    client.send_ooc_others('A mod has nuked all shownames.', is_mod=False)
-    client.send_ooc_others('{} has nuked all shownames.'.format(client.name), is_mod=True)
+    client.send_ooc_others('A mod has nuked all shownames.', is_staff=False)
+    client.send_ooc_others('{} has nuked all shownames.'.format(client.name), is_staff=True)
     logger.log_server('{} has nuked all shownames.'.format(client.name), client)
 
 def ooc_cmd_showname_set(client: ClientManager.Client, arg: str):
@@ -5560,8 +5560,8 @@ def ooc_cmd_unilock(client: ClientManager.Client, arg: str):
                                             (note the ,\ in the command).
     """
 
-    #needs to be fixed
-    
+    #needs to be tested
+    Constants.assert_command(client, arg, parameters='&1-2', split_commas=True)
     if len(areas) > 2 or arg == '':
         raise ArgumentError('This command takes one or two arguments.')
     if len(areas) == 2 and not client.is_staff():
