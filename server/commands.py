@@ -3658,8 +3658,6 @@ def ooc_cmd_passage_clear(client: ClientManager.Client, arg: str):
     /passage_clear
     /passage_clear <area_range_start>, <area_range_end>
 
-    /passage_clear <area_range_start>, <area_range_end>
-
     PARAMETERS
     <area_range_start>: Start of area range (inclusive)
     <area_range_end>: End of area range (inclusive)
