@@ -2197,21 +2197,22 @@ def ooc_cmd_handicap(client: ClientManager.Client, arg: str):
     """
 
     Constants.assert_command(client, arg, is_staff=True, parameters='&2-4', split_spaces=True)
+    args = arg.split(' ')
 
     # Obtain targets
-    targets = Constants.parse_id_or_ipid(client, arg[0])
+    targets = Constants.parse_id_or_ipid(client, args[0])
 
     # Check if valid length and convert to seconds
-    length = Constants.parse_time_length(arg[1]) # Also internally validates
+    length = Constants.parse_time_length(args[1]) # Also internally validates
 
     # Check name
-    if len(arg) >= 3:
-        name = arg[2]
+    if len(args) >= 3:
+        name = args[2]
     else:
         name = "Handicap" # No spaces!
 
     # Check announce_if_over status
-    if len(arg) >= 4 and arg[3] in ['False', 'false', '0', 'No', 'no']:
+    if len(args) >= 4 and args[3] in ['False', 'false', '0', 'No', 'no']:
         announce_if_over = False
     else:
         announce_if_over = True
