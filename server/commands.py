@@ -2605,10 +2605,9 @@ def ooc_cmd_lights(client: ClientManager.Client, arg: str):
     """
 
     try:
-        Constants.assert_command(client, arg, parameters='=1')
+        Constants.assert_command(client, arg, parameters='>0')
     except ArgumentError:
         raise ArgumentError('You must specify either on or off.')
-
     if arg not in ['off', 'on']:
         raise ClientError('Expected on or off.')
     if not client.is_staff() and not client.area.has_lights:
@@ -4835,7 +4834,7 @@ def ooc_cmd_switch(client: ClientManager.Client, arg: str):
     """
 
     try:
-        Constants.assert_command(client, arg, parameters='>1')
+        Constants.assert_command(client, arg, parameters='>0')
     except ArgumentError:
         raise ArgumentError('You must specify a character name.')
 
@@ -5536,10 +5535,11 @@ def ooc_cmd_unilock(client: ClientManager.Client, arg: str):
     """
 
     Constants.assert_command(client, arg, parameters='&1-2', split_commas=True)
-    if len(arg) == 2 and not client.is_staff():
+    areas = arg.split(', ')
+    if len(areas) == 2 and not client.is_staff():
         raise ClientError('You must be authorized to use the two-parameter version of this command.')
 
-    areas = Constants.parse_two_area_names(client, arg.split(', '), area_duplicate=False,
+    areas = Constants.parse_two_area_names(client, areas, area_duplicate=False,
                                            check_valid_range=False)
     now_reachable = Constants.parse_passage_lock(client, areas, bilock=False)
 
