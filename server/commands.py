@@ -473,9 +473,8 @@ def ooc_cmd_bilock(client: ClientManager.Client, arg: str):
                                            and Class Trial Room, 2 (note the ,\ in the command.
     """
 
-    #needs to be fixed
     Constants.assert_command(client, arg, parameters='&1-2', split_commas=True)
-    areas = arg
+    areas = arg.split(', ')
     if len(areas) == 2 and not client.is_staff():
         raise ClientError('You must be authorized to use the two-parameter version of this command.')
 
@@ -1088,7 +1087,9 @@ def ooc_cmd_char_restrict(client: ClientManager.Client, arg: str):
 
     try:
         Constants.assert_command(client, arg, is_staff=True, parameters='=1')
+        client.send_ooc(arg)
     except ArgumentError:
+        client.send_ooc(arg)
         raise ArgumentError('This command takes one character name.')
 
     if arg not in client.server.char_list:
@@ -2205,32 +2206,32 @@ def ooc_cmd_handicap(client: ClientManager.Client, arg: str):
     which will not send notifications once the timer expires.
     """
 
-    #needs to be fixed
-    #not really, just ask if this should be condensed further
-    Constants.assert_command(client, arg, is_staff=True)
-
-    args = arg.split(' ')
-    if len(args) < 2:
-        raise ClientError('This command variation takes at least two parameters '
+    try:
+        Constants.assert_command(client, arg, is_staff=True, parameters='&2-4', split_spaces=True)
+    except ArgumentError:
+        arg = arg.split(' ')
+        if len(arg) < 2:
+            raise ClientError('This command variation takes at least two parameters '
                           '(target and length).')
-    if len(args) >= 5:
-        raise ClientError('This command variation takes at most four parameters '
+        if len(arg) > 4:
+            raise ClientError('This command variation takes at most four parameters '
                           '(target, length, name, announce_if_over).')
 
     # Obtain targets
-    targets = Constants.parse_id_or_ipid(client, args[0])
+    arg = arg.split(' ')
+    targets = Constants.parse_id_or_ipid(client, arg[0])
 
     # Check if valid length and convert to seconds
-    length = Constants.parse_time_length(args[1]) # Also internally validates
+    length = Constants.parse_time_length(arg[1]) # Also internally validates
 
     # Check name
-    if len(args) >= 3:
-        name = args[2]
+    if len(arg) >= 3:
+        name = arg[2]
     else:
         name = "Handicap" # No spaces!
 
     # Check announce_if_over status
-    if len(args) >= 4 and args[3] in ['False', 'false', '0', 'No', 'no']:
+    if len(arg) >= 4 and arg[3] in ['False', 'false', '0', 'No', 'no']:
         announce_if_over = False
     else:
         announce_if_over = True
@@ -3680,7 +3681,7 @@ def ooc_cmd_passage_clear(client: ClientManager.Client, arg: str):
     /passage_clear
     /passage_clear <area_range_start>, <area_range_end>
 
-    /passage_restore <area_range_start>, <area_range_end>
+    /passage_clear <area_range_start>, <area_range_end>
 
     PARAMETERS
     <area_range_start>: Start of area range (inclusive)
@@ -3728,10 +3729,9 @@ def ooc_cmd_passage_restore(client: ClientManager.Client, arg: str):
     /passage_restore 16, 116        :: Restores the passages starting in areas 16 through 116.
     """
 
-    #needs to be fixed
     Constants.assert_command(client, arg, is_staff=True, parameters='<3', split_commas=True)
-    areas = arg
-
+    areas = arg.split(', ')
+    
     areas = Constants.parse_two_area_names(client, areas)
 
     for i in range(areas[0].id, areas[1].id+1):
@@ -3744,6 +3744,7 @@ def ooc_cmd_passage_restore(client: ClientManager.Client, arg: str):
     else:
         client.send_ooc('Passages in areas {} through {} have been restored to their original '
                         'state.'.format(areas[0].name, areas[1].name))
+
 
 def ooc_cmd_ping(client: ClientManager.Client, arg: str):
     """
@@ -4607,8 +4608,6 @@ def ooc_cmd_showname_freeze(client: ClientManager.Client, arg: str):
     /showname_freeze        :: Unfreezes all shownames. Everyone can use /showname again.
     """
 
-    #needs to be fixed
-    #somehow creates an error AFTER the Constants block??
     Constants.assert_command(client, arg, is_mod=True, parameters='=0')
 
     client.server.showname_freeze = not client.server.showname_freeze
@@ -4616,9 +4615,9 @@ def ooc_cmd_showname_freeze(client: ClientManager.Client, arg: str):
 
     client.send_ooc('You have {} all shownames.'.format(status[client.server.showname_freeze]))
     client.send_ooc_others('A mod has {} all shownames.'
-                           .format(status[client.server.showname_freeze]), is_mod=False)
+                           .format(status[client.server.showname_freeze]), is_staff=False)
     client.send_ooc_others('{} has {} all shownames.'
-                           .format(client.name, status[client.server.showname_freeze]), is_mod=True)
+                           .format(client.name, status[client.server.showname_freeze]), is_staff=True)
     logger.log_server('{} has {} all shownames.'
                       .format(client.name, status[client.server.showname_freeze]), client)
 
@@ -4674,8 +4673,6 @@ def ooc_cmd_showname_nuke(client: ClientManager.Client, arg: str):
     /showname_nuke          :: Clears all shownames
     """
 
-    #needs to be fixed
-    #shares is_mod problems
     Constants.assert_command(client, arg, is_mod=True, parameters='=0')
 
     for c in client.server.client_manager.clients:
@@ -4955,9 +4952,8 @@ def ooc_cmd_timer(client: ClientManager.Client, arg: str):
       anyone at any area.
     """
 
-    #needs to be fixed
-    #only takes single digits??
     Constants.assert_command(client, arg, parameters='&1-3', split_spaces=True)
+    arg = arg.split(' ')
 
     # Check if valid length and convert to seconds
     length = Constants.parse_time_length(arg[0]) # Also internally validates
@@ -5560,14 +5556,11 @@ def ooc_cmd_unilock(client: ClientManager.Client, arg: str):
                                             (note the ,\ in the command).
     """
 
-    #needs to be tested
     Constants.assert_command(client, arg, parameters='&1-2', split_commas=True)
-    if len(areas) > 2 or arg == '':
-        raise ArgumentError('This command takes one or two arguments.')
-    if len(areas) == 2 and not client.is_staff():
+    if len(arg) == 2 and not client.is_staff():
         raise ClientError('You must be authorized to use the two-parameter version of this command.')
 
-    areas = Constants.parse_two_area_names(client, areas, area_duplicate=False,
+    areas = Constants.parse_two_area_names(client, arg.split(', '), area_duplicate=False,
                                            check_valid_range=False)
     now_reachable = Constants.parse_passage_lock(client, areas, bilock=False)
 
