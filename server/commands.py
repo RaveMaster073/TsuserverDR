@@ -78,7 +78,7 @@ def ooc_cmd_area(client: ClientManager.Client, arg: str):
     /area 1     :: Moves you to area 1
     """
 
-    args = arg.strip()
+    args = arg.split()
     # List all areas
     if len(args) == 0:
         if client.in_rp:
