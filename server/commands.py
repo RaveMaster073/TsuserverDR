@@ -5437,9 +5437,7 @@ def ooc_cmd_ungimp(client: ClientManager.Client, arg: str):
     """
 
     Constants.assert_command(client, arg, is_mod=True)
-    if not client.is_mod:
-        raise ClientError('You must be authorized to do that.')
-
+    
     # Ungimp matching targets
     for c in Constants.parse_id_or_ipid(client, arg):
         c.gimp = False
