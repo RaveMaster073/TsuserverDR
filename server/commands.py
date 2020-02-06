@@ -5793,7 +5793,7 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
 
     cm = client.server.client_manager
     target, _, msg = cm.get_target_public(client, arg, only_in_area=True)
-    privacy = not client.area.private_area
+    public_area = not client.area.private_area
 
     final_sender = client.displayname
     final_rec_sender = 'Someone' if (target.is_deaf and target.is_blind) else client.displayname
@@ -5821,7 +5821,7 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
         target.send_ic(msg=msg, pos=client.pos, cid=client.char_id, showname=client.showname,
                        bypass_deafened_starters=True) # send_ic handles nerfing for deafened
 
-        if not client.is_visible and privacy:
+        if not client.is_visible and public_area:
             # This code should run if client and target are sneaked and part of same party
             # and also if the area is public
             client.send_ooc_others('(X) {} whispered `{}` to {} while both were sneaking and part '
@@ -5830,15 +5830,16 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
                                            client.area.id), is_zstaff_flex=True, not_to={target})
         else:
             # Otherwise, announce it to everyone
-            # If the area is private, zone watchers and staff get normal whisper reports if in the same area
-            if privacy:
+            # If the area is private, zone watchers and staff get normal whisper reports if in the same 
+            # area
+            if public_area:
                 client.send_ooc_others('(X) {} whispered `{}` to {} ({}).'
-                                   .format(final_st_sender, final_message, final_target,
+                                       .format(final_st_sender, final_message, final_target,
                                            client.area.id), is_zstaff_flex=True, not_to={target})
             client.send_ooc_others('{} whispered something to {}.'
                                    .format(final_sender, final_target),
-                                   is_zstaff_flex=False if privacy else None, in_area=True, not_to={target},
-                                   to_blind=False)
+                                   is_zstaff_flex=False if public_area else None, in_area=True, 
+				   not_to={target}, to_blind=False)
     elif target.is_visible:
         client.send_ooc('You spooked {} by whispering `{}` to them while sneaking.'
                         .format(final_target, final_message))
