@@ -1191,9 +1191,11 @@ def ooc_cmd_cleargm(client: ClientManager.Client, arg: str):
     """
 
     Constants.assert_command(client, arg, is_officer=True, parameters='=0')
-    
+
+    gm_list = ''
     for area in client.server.area_manager.areas:
         for c in [x for x in area.clients if x.is_gm]:
+            gm_list += (': ' if gm_list == '' else ', ') + c.name
             c.is_gm = False
             if client.server.rp_mode:
                 c.in_rp = True
@@ -1219,7 +1221,10 @@ def ooc_cmd_cleargm(client: ClientManager.Client, arg: str):
                     c.send_ooc_others('Zone `{}` was automatically deleted as no one was watching '
                                       'it anymore.'.format(target_zone.get_id()), is_officer=True)
 
+    gm_list += '.'
     client.send_ooc('All GMs logged out.')
+    if len(gm_list) != '.':
+        client.send_ooc_others('The following GMs have been logged out by an officer{}.'.format(gm_list), is_officer=True)
 
 def ooc_cmd_clock(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
@@ -2107,7 +2112,7 @@ def ooc_cmd_gmself(client: ClientManager.Client, arg: str):
         raise ClientError('All opened clients are logged in as game master.')
 
     for target in targets:
-        target.login(client.server.config['gmpass'], target.auth_gm, 'game master')
+        target.login(client.server.config['gmpass'], target.auth_gm, 'game master', announce_to_officers=False)
 
     client.send_ooc('Logged in client{} {} as game master.'
                     .format('s' if len(targets) > 1 else '',
@@ -2738,8 +2743,16 @@ def ooc_cmd_logout(client: ClientManager.Client, arg: str):
     /logout
     """
 
-    Constants.assert_command(client, arg, parameters='=0')
+    Constants.assert_command(client, arg, is_staff=True, parameters='=0')
 
+    if client.is_mod:
+        role = 'moderator'
+    elif client.is_cm:
+        role = 'community manager'
+    else:
+        role = 'game master'
+
+    client.send_ooc_others('{} is no longer a {}.'.format(client.name, role), is_officer=True)
     client.is_mod = False
     client.is_gm = False
     client.is_cm = False
@@ -2963,8 +2976,9 @@ def ooc_cmd_make_gm(client: ClientManager.Client, arg: str):
     if target.is_gm:
         raise ClientError('Client {} is already a GM.'.format(target.id))
 
-    target.login(client.server.config['gmpass'], target.auth_gm, 'game master')
+    target.login(client.server.config['gmpass'], target.auth_gm, 'game master', announce_to_officers=False)
     client.send_ooc('Logged client {} as a GM.'.format(target.id))
+    client.send_ooc_others('{} has been logged in as a game master by an officer.'.format(target.name), is_officer=True)
 
 def ooc_cmd_minimap(client: ClientManager.Client, arg: str):
     """
