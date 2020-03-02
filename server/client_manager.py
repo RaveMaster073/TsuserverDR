@@ -794,7 +794,7 @@ class ClientManager:
                     # 3. The client is transient to area passages
                     norm_check = (len([c for c in area.clients if c.is_visible or c == self]) > 0
                                   and (unrestricted_access_area or self.is_transient
-                                       or area in current_area.reachable_areas))
+                                       or area.name in current_area.reachable_areas))
 
                     if (self.is_staff() and len(area.clients) > 0) or \
                     (not self.is_staff() and norm_check):
