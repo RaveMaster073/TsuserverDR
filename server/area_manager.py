@@ -230,7 +230,7 @@ class AreaManager:
                 self.background = self.server.config['blackout_background']
                 self.background_backup = bg
             for c in self.clients:
-                if (c.is_blind and not override_blind) or not self.lights:
+                if c.is_blind and not override_blind:
                     c.send_command('BN', self.server.config['blackout_background'])
                 else:
                     c.send_command('BN', bg)
