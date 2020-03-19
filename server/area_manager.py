@@ -235,8 +235,6 @@ class AreaManager:
                 else:
                     c.send_command('BN', bg)
 
-                    
-
         def get_chars_unusable(self, allow_restricted=False, more_unavail_chars=None):
             """
             Obtain all characters that a player in the current area may NOT change to.
