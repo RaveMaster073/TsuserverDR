@@ -522,8 +522,8 @@ class AreaManager:
                     self.background_backup = self.background
                 intended_background = self.server.config['blackout_background']
 
-            self.change_background(intended_background, validate=False) # Allow restoring custom bg.
             self.lights = new_lights
+            self.change_background(intended_background, validate=False) # Allow restoring custom bg.
 
             # Announce light status change
             if initiator: # If a player initiated the change light sequence, send targeted messages
