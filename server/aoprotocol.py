@@ -38,7 +38,6 @@ class AOProtocol(asyncio.Protocol):
         self.client = None
         self.buffer = ''
         self.ping_timeout = None
-        self.passwords = ['modpass', 'cmpass', 'gmpass', 'gmpass1', 'gmpass2', 'gmpass3', 'gmpass4', 'gmpass5', 'gmpass6', 'gmpass7']
         logger.log_print = logger.log_print2 if self.server.in_test else logger.log_print
 
         # Determine whether /exec is active or not and warn server owner if so.
