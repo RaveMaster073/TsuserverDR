@@ -187,7 +187,8 @@ class AOProtocol(asyncio.Protocol):
                 self.client.disconnect()
                 return
 
-        logger.log_server('Connected. HDID: {}.'.format(self.client.hdid), self.client)
+        if self.client.hdid != 'ms2-prober' or self.server.config['show_ms2-prober']:
+            logger.log_server('Connected. HDID: {}.'.format(self.client.hdid), self.client)
         self.client.send_command('ID', self.client.id, self.server.software,
                                  self.server.get_version_string())
         self.client.send_command('PN', self.server.get_player_count(),
@@ -459,6 +460,12 @@ class AOProtocol(asyncio.Protocol):
                 self.client.send_ooc_others('(X) {} tried to say `{}` but is currently gagged.'
                                             .format(self.client.displayname, raw_msg),
                                             is_zstaff_flex=True, in_area=True)
+
+        # Censor passwords if login command accidentally typed in IC
+        for password in self.server.config['passwords']:
+            for login in ['login ', 'logincm ', 'loginrp ']:
+                if login + password in msg:
+                    msg = msg.replace(password, '[CENSORED]')
 
         if pargs['evidence']:
             evidence_position = self.client.evi_list[pargs['evidence']] - 1

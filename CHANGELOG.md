@@ -382,3 +382,10 @@
 * Readded description of /login to README.md
 
 ### (4.2.4)
+* Added /time_est
+* Added client version to /whois
+* Warnings are now sent to players in once-locked rooms that were reloaded via /area_list
+* Added server configuration setting to disable ms2-prober connections being logged in server logs.
+* /whisper messages from private rooms are no longer sent to staff members.
+* Added login/logout messages from staff positions to other staff members.
+* Staff login+passwords messages are now censored both in IC and OOC. 

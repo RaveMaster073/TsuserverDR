@@ -874,13 +874,13 @@ class ClientManager:
             """
             return self.is_mod or self.is_cm or self.is_gm
 
-        def login(self, arg, auth_command, role):
+        def login(self, arg, auth_command, role, announce_to_officers=True):
             """
             Wrapper function for the login method for all roles (GM, CM, Mod)
             """
             if len(arg) == 0:
                 raise ClientError('You must specify the password.')
-            auth_command(arg)
+            auth_command(arg, announce_to_officers=announce_to_officers)
 
             # The following actions are true for all logged in roles
             if self.area.evidence_mod == 'HiddenCM':
@@ -888,6 +888,10 @@ class ClientManager:
             self.reload_music_list() # Update music list to show all areas
 
             self.send_ooc('Logged in as a {}.'.format(role))
+            # Filter out messages about GMs because they were called earlier in auth_gm
+            if not self.is_gm and announce_to_officers:
+                self.send_ooc_others('{} logged in as a {}.'.format(self.name, role),
+                                     is_officer=True)
             logger.log_server('Logged in as a {}.'.format(role), self)
 
             if self.area.in_zone and self.area.in_zone != self.zone_watched:
@@ -896,7 +900,7 @@ class ClientManager:
                               'notifications, start watching it with /zone_watch {}'
                               .format(zone_id, zone_id))
 
-        def auth_mod(self, password):
+        def auth_mod(self, password, announce_to_officers=True):
             if self.is_mod:
                 raise ClientError('Already logged in.')
             if password == self.server.config['modpass']:
@@ -905,9 +909,12 @@ class ClientManager:
                 self.is_gm = False
                 self.in_rp = False
             else:
+                if announce_to_officers:
+                    self.send_ooc_others('{} failed to login as a moderator.'.format(self.name),
+                                         is_officer=True)
                 raise ClientError('Invalid password.')
 
-        def auth_cm(self, password):
+        def auth_cm(self, password, announce_to_officers=True):
             if self.is_cm:
                 raise ClientError('Already logged in.')
             if password == self.server.config['cmpass']:
@@ -916,9 +923,12 @@ class ClientManager:
                 self.is_gm = False
                 self.in_rp = False
             else:
+                if announce_to_officers:
+                    self.send_ooc_others('{} failed to login as a community manager.'
+                                         .format(self.name), is_officer=True)
                 raise ClientError('Invalid password.')
 
-        def auth_gm(self, password):
+        def auth_gm(self, password, announce_to_officers=True):
             if self.is_gm:
                 raise ClientError('Already logged in.')
 
@@ -931,11 +941,21 @@ class ClientManager:
                 valid_passwords.append(daily_gmpass)
 
             if password in valid_passwords:
+                if password == daily_gmpass:
+                    g_or_daily = 'daily pass'
+                else:
+                    g_or_daily = 'global pass'
+                if announce_to_officers:
+                    self.send_ooc_others('{} logged in as a game master with the {}.'
+                                         .format(self.name, g_or_daily), is_officer=True)
                 self.is_gm = True
                 self.is_mod = False
                 self.is_cm = False
                 self.in_rp = False
             else:
+                if announce_to_officers:
+                    self.send_ooc_others('{} failed to login as a game master.'
+                                         .format(self.name), is_officer=True)
                 raise ClientError('Invalid password.')
 
         def get_hdid(self):
@@ -1012,6 +1032,7 @@ class ClientManager:
             info += '\n*Following: {}'.format(self.following.id if self.following else "-")
             info += '\n*Followed by: {}'.format(", ".join([str(c.id) for c in self.followedby])
                                                 if self.followedby else "-")
+            info += '\n*Is Using: {0[0]} {0[1]}'.format(self.version)
             info += ('\n*Online for: {}. Last active: {}'
                      .format(Constants.time_elapsed(self.joined), self.last_active))
             return info

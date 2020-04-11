@@ -194,12 +194,16 @@ Additional notes are listed at the end of the command list.
     - Similar to /getarea, but lists shownames along with character names.
 * **showname_areas**
     - Similar to /getareas, but lists shownames along with character names.
+* **spectate**
+    - Switches you to a SPECTATOR character.
 * **switch** "character name"
     - Switches you to the given character.
 * **time**
     - Displays the server's local time.
 * **time12**
     - Displays the server's local time in 12 hour format.
+* **time_est**
+    - Displays the local time in EST in 12 hour format.
 * **timer** "length" "timer name" "public"
     - Starts a timer of the given length in seconds, which will send a notification to people in the area once it expires.
     - If given a timer name, it will override the default timer name (OOCNameTimer).

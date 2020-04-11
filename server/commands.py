@@ -18,6 +18,7 @@
 
 # possible keys: ip, OOC, id, cname, ipid, hdid
 
+import datetime
 import random
 import hashlib
 import string
@@ -190,6 +191,9 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
     if not client.is_mod:
         raise ClientError('You must be authorized to do that.')
 
+    # lists which areas are locked before the reload
+    old_locked_areas = [area.name for area in client.server.area_manager.areas if area.is_locked]
+
     if not arg:
         client.server.area_manager.load_areas()
         client.send_ooc('You have restored the original area list of the server.')
@@ -213,6 +217,17 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
         client.send_ooc_others('The area list {} has been loaded.'.format(arg), is_staff=False)
         client.send_ooc_others('{} has loaded the area list {}.'.format(client.name, arg),
                                is_staff=True)
+
+    # Every area that was locked before the reload gets warned that their areas were unlocked.
+    for area_name in old_locked_areas:
+        try:
+            area = client.server.area_manager.get_area_by_name(area_name)
+            area.broadcast_ooc('This area became unlocked after the area reload. Relock it using '
+			                   '/lock.')
+        # if no area is found with that name, then an old locked area does not exist anymore, so
+        # we do not need to do anything.
+        except AreaError:
+            pass
 
 def ooc_cmd_area_lists(client: ClientManager.Client, arg: str):
     """ (MOD ONLY)
@@ -1205,8 +1220,10 @@ def ooc_cmd_cleargm(client: ClientManager.Client, arg: str):
     if len(arg) != 0:
         raise ArgumentError('This command has no arguments.')
 
+    gm_list = ''
     for area in client.server.area_manager.areas:
         for c in [x for x in area.clients if x.is_gm]:
+            gm_list += (': ' if gm_list == '' else ', ') + c.name
             c.is_gm = False
             if client.server.rp_mode:
                 c.in_rp = True
@@ -1233,6 +1250,9 @@ def ooc_cmd_cleargm(client: ClientManager.Client, arg: str):
                                       'it anymore.'.format(target_zone.get_id()), is_officer=True)
 
     client.send_ooc('All GMs logged out.')
+    if len(gm_list) > 0:
+        client.send_ooc_others('The following GMs have been logged out by {}{}.'
+                               .format(client.name, gm_list), is_officer=True)
 
 def ooc_cmd_clock(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
@@ -2139,7 +2159,8 @@ def ooc_cmd_gmself(client: ClientManager.Client, arg: str):
         raise ClientError('All opened clients are logged in as game master.')
 
     for target in targets:
-        target.login(client.server.config['gmpass'], target.auth_gm, 'game master')
+        target.login(client.server.config['gmpass'], target.auth_gm, 'game master',
+                     announce_to_officers=False)
 
     client.send_ooc('Logged in client{} {} as game master.'
                     .format('s' if len(targets) > 1 else '',
@@ -2773,7 +2794,7 @@ def ooc_cmd_loginrp(client: ClientManager.Client, arg: str):
     client.login(arg, client.auth_gm, 'game master')
 
 def ooc_cmd_logout(client: ClientManager.Client, arg: str):
-    """
+    """ (STAFF ONLY)
     Logs out the current user from all staff roles and puts them in RP mode if needed.
 
     SYNTAX
@@ -2786,7 +2807,17 @@ def ooc_cmd_logout(client: ClientManager.Client, arg: str):
     /logout
     """
 
-    Constants.assert_command(client, arg, parameters='=0')
+    Constants.assert_command(client, arg, is_staff=True, parameters='=0')
+
+    if client.is_mod:
+        role = 'moderator'
+    elif client.is_cm:
+        role = 'community manager'
+    else:
+        role = 'game master'
+
+
+    client.send_ooc_others('{} is no longer a {}.'.format(client.name, role), is_officer=True)
 
     client.is_mod = False
     client.is_gm = False
@@ -3016,8 +3047,11 @@ def ooc_cmd_make_gm(client: ClientManager.Client, arg: str):
     if target.is_gm:
         raise ClientError('Client {} is already a GM.'.format(target.id))
 
-    target.login(client.server.config['gmpass'], target.auth_gm, 'game master')
+    target.login(client.server.config['gmpass'], target.auth_gm, 'game master',
+                 announce_to_officers=False)
     client.send_ooc('Logged client {} as a GM.'.format(target.id))
+    client.send_ooc_others('{} has been logged in as a game master by {}.'
+                           .format(target.name, client.name), is_officer=True)
 
 def ooc_cmd_minimap(client: ClientManager.Client, arg: str):
     """
@@ -4943,6 +4977,26 @@ def ooc_cmd_time12(client: ClientManager.Client, arg: str):
 
     client.send_ooc(time.strftime('%a %b %e %I:%M:%S %p (%z) %Y'))
 
+def ooc_cmd_time_est(client, arg):
+    """
+    Return the current server date and time in Eastern Standard Time.
+
+    SYNTAX
+    /time_est
+
+    PARAMETERS
+    None
+
+    EXAMPLES
+    /time_est         :: May return something like "Sat Apr 27 09:04:47 AM 2019"
+    """
+
+    if len(arg) != 0:
+        raise ArgumentError('This command has no arguments.')
+
+    est = datetime.datetime.utcnow() - datetime.timedelta(hours=5)
+    client.send_ooc(est.strftime("%a %b %e %I:%M:%S %p %Y"))
+
 def ooc_cmd_timer(client: ClientManager.Client, arg: str):
     """
     Start a timer.
@@ -5868,6 +5922,7 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
 
     cm = client.server.client_manager
     target, _, msg = cm.get_target_public(client, arg, only_in_area=True)
+    public_area = not client.area.private_area
 
     final_sender = client.displayname
     final_rec_sender = 'Someone' if (target.is_deaf and target.is_blind) else client.displayname
@@ -5894,21 +5949,25 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
         target.send_ic(msg=msg, pos=client.pos, cid=client.char_id, showname=client.showname,
                        bypass_deafened_starters=True) # send_ic handles nerfing for deafened
 
-        if not client.is_visible:
+        if not client.is_visible and public_area:
             # This code should run if client and target are sneaked and part of same party
+            # and also if the area is public
             client.send_ooc_others('(X) {} whispered `{}` to {} while both were sneaking and part '
                                    'of the same party ({}).'
                                    .format(final_st_sender, final_message, final_target,
                                            client.area.id), is_zstaff_flex=True, not_to={target})
         else:
-            # Otherwise, announce it to everyone
-            client.send_ooc_others('(X) {} whispered `{}` to {} ({}).'
-                                   .format(final_st_sender, final_message, final_target,
-                                           client.area.id), is_zstaff_flex=True, not_to={target})
+            # Otherwise, announce it to everyone. If the area is private, zone watchers and staff
+            # get normal whisper reports if in the same area.
+            if public_area:
+                client.send_ooc_others('(X) {} whispered `{}` to {} ({}).'
+                                       .format(final_st_sender, final_message, final_target,
+                                               client.area.id),
+                                       is_zstaff_flex=True, not_to={target})
             client.send_ooc_others('{} whispered something to {}.'
                                    .format(final_sender, final_target),
-                                   is_zstaff_flex=False, in_area=True, not_to={target},
-                                   to_blind=False)
+                                   is_zstaff_flex=False if public_area else None, in_area=True,
+                                   not_to={target}, to_blind=False)
     elif target.is_visible:
         client.send_ooc('You spooked {} by whispering `{}` to them while sneaking.'
                         .format(final_target, final_message))
@@ -5922,9 +5981,10 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
         target.send_ooc('Your ears seemed to pick up something.', to_deaf=True)
         target.send_ic(msg=msg, pos='jud', showname='???', bypass_deafened_starters=True)
 
-        client.send_ooc_others('(X) {} whispered `{}` to {} while sneaking ({}).'
-                               .format(final_st_sender, final_message, final_target,
-                                       client.area.id), is_zstaff_flex=True, not_to={target})
+        if not client.area.private_area:
+            client.send_ooc_others('(X) {} whispered `{}` to {} while sneaking ({}).'
+                                   .format(final_st_sender, final_message, final_target,
+                                           client.area.id), is_zstaff_flex=True, not_to={target})
     else: # Sender is not sneaked, target is
         if client.is_staff():
             msg = ('Your target {} is sneaking and whispering to them would reveal them. Instead, '
