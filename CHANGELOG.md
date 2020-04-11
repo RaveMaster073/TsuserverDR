@@ -389,3 +389,4 @@
 * /whisper messages from private rooms are no longer sent to staff members.
 * Added login/logout messages from staff positions to other staff members.
 * Staff login+passwords messages are now censored both in IC and OOC. 
+* Added /spectate
