@@ -1,3 +1,21 @@
+# TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
+#
+# Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
+# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import asyncio
 import random
 import unittest
@@ -258,8 +276,12 @@ class _TestClientManager(ClientManager):
             # Look for all officers and assert messages of this client's login
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
+<<<<<<< HEAD
                     c.assert_ooc('{} [{}] logged in as a moderator.'
                                  .format(self.name, self.id), over=True)
+=======
+                    c.assert_ooc('{} logged in as a moderator.'.format(self.name), over=True)
+>>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
             assert self.is_mod
 
         def make_cm(self, over=True):
@@ -271,8 +293,12 @@ class _TestClientManager(ClientManager):
             # Look for all officers and assert messages of this client's login
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
+<<<<<<< HEAD
                     c.assert_ooc('{} [{}] logged in as a community manager.'
                                  .format(self.name, self.id), over=True)
+=======
+                    c.assert_ooc('{} logged in as a community manager.'.format(self.name), over=True)
+>>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
             assert self.is_cm
 
         def make_gm(self, over=True):
@@ -284,8 +310,12 @@ class _TestClientManager(ClientManager):
             # Look for all officers and assert messages of this client's login
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
+<<<<<<< HEAD
                     c.assert_ooc('{} [{}] logged in as a game master with the global pass.'
                                  .format(self.name, self.id), over=True)
+=======
+                    c.assert_ooc('{} logged in as a game master with the global pass.'.format(self.name), over=True)
+>>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
             assert self.is_gm
 
         def make_normie(self, over=True, other_over=lambda c: True):
@@ -301,6 +331,7 @@ class _TestClientManager(ClientManager):
             self.ooc('/logout')
             self.assert_ooc('You are no longer logged in.', ooc_over=over)
             self.assert_packet('FM', None, over=over)
+<<<<<<< HEAD
             # Assert command for any officers of this client's logout
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
@@ -308,6 +339,13 @@ class _TestClientManager(ClientManager):
                                  over=other_over(c))
             assert not self.is_staff()
             assert not (self.is_mod and self.is_cm and self.is_gm)
+=======
+            # assert command for any officers of this client's logout
+            for c in self.server.client_manager.clients:
+                if (c.is_mod or c.is_cm) and c != self:
+                    c.assert_ooc('{} is no longer a {}.'.format(self.name, role), over=other_over(c))
+            assert not self.is_staff()
+>>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
 
         def move_area(self, area_id, discard_packets=True, discard_trivial=False):
             as_command = random.randint(0, 1)
@@ -322,6 +360,8 @@ class _TestClientManager(ClientManager):
             assert self.area.id == area_id, (self.area.id, area_id, as_command)
 
             if discard_trivial:
+                # Discard the trivial packets
+                # Note we use somewhere because MS usually comes between LE and FM
                 packets_to_discard = (
                                     ['HP', None],
                                     ['HP', None],
@@ -330,7 +370,13 @@ class _TestClientManager(ClientManager):
                                     ['FM', None]
                                     )
                 for packet in packets_to_discard:
-                    self.discard_packet(packet)
+                    self.discard_packet(packet, somewhere=True)
+
+                # Discard IC blankpost and OOC standard notification
+                _, x = self.search_match(['MS', None],
+                                          self.received_packets, somewhere=True, remove_match=True,
+                                          allow_partial_match=True)
+                self.discard_ic(x[1])
 
                 _, x = self.search_match(['CT', ('<dollar>H', 'Changed area to')],
                                           self.received_packets, somewhere=True, remove_match=True,
@@ -675,9 +721,15 @@ class _TestClientManager(ClientManager):
             except AssertionError:
                 pass
 
-        def discard_ooc(self, ooc):
+        def discard_ic(self, message):
             try:
-                self.search_match(ooc, self.received_ooc, somewhere=True, remove_match=True)
+                self.search_match(message, self.received_ic, somewhere=True, remove_match=True)
+            except AssertionError:
+                pass
+
+        def discard_ooc(self, message):
+            try:
+                self.search_match(message, self.received_ooc, somewhere=True, remove_match=True)
             except AssertionError:
                 pass
 
@@ -742,7 +794,8 @@ class _TestClientManager(ClientManager):
                 # 15 = showname
                 if not (len(args) == 16):
                     raise ValueError('Malformed MS packet for an IC message {}'.format(args))
-                if args[2] != self.last_ic[0] or args[4] != self.last_ic[1]:
+                # AO/DRO Client discards repetitions, except when it comes from a system IC message
+                if (args[8] == -1) or (args[2] != self.last_ic[0] or args[4] != self.last_ic[1]):
                     self.received_ic.append(args)
                     self.last_ic = args[2], args[4]
                 else:

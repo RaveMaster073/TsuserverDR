@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -88,7 +88,63 @@ class ServerError(TsuserverException):
 class PartyError(TsuserverException):
     pass
 
+<<<<<<< HEAD
 @recreate_subexceptions
+=======
+class PlayerGroupError(TsuserverException):
+    class PlayerAlreadyMemberError(TsuserverException):
+        pass
+
+    class PlayerAlreadyLeaderError(TsuserverException):
+        pass
+
+    class PlayerInAnotherGroupError(TsuserverException):
+        pass
+
+    class PlayerInNoGroupError(TsuserverException):
+        pass
+
+    class PlayerNotMemberError(TsuserverException):
+        pass
+
+    class PlayerNotLeaderError(TsuserverException):
+        pass
+
+    class GroupIsEmptyError(TsuserverException):
+        pass
+
+    class GroupIsFullError(TsuserverException):
+        pass
+
+    class ManagerTooManyGroupsError(TsuserverException):
+        pass
+
+    class ManagerDoesNotManageGroupError(TsuserverException):
+        pass
+
+class StepTimerError(TsuserverException):
+    class InvalidStepTimerValueError(TsuserverException):
+        pass
+
+    class InvalidMinTimerValueError(TsuserverException):
+        pass
+
+    class AlreadyStartedStepTimerError(TsuserverException):
+        pass
+
+    class NotStartedStepTimerError(TsuserverException):
+        pass
+
+    class AlreadyPausedStepTimerError(TsuserverException):
+        pass
+
+    class NotPausedStepTimerError(TsuserverException):
+        pass
+
+    class AlreadyCanceledStepTimerError(TsuserverException):
+        pass
+
+>>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
 class ZoneError(TsuserverException):
     class AreaConflictError(TsuserverException):
         pass

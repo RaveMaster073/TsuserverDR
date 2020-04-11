@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -561,9 +561,12 @@ class AOProtocol(asyncio.Protocol):
                                         .format(self.client.displayname, self.client.area.id),
                                         is_zstaff=True)
 
+        # Restart AFK kick timer and lurk callout timers, if needed
         self.server.tasker.create_task(self.client,
                                        ['as_afk_kick', self.client.area.afk_delay,
                                         self.client.area.afk_sendto])
+        self.client.check_lurk()
+
         if self.client.area.is_recording:
             self.client.area.recorded_messages.append(args)
 
@@ -631,6 +634,7 @@ class AOProtocol(asyncio.Protocol):
                 args[1] = Constants.disemconsonant_message(args[1])
             if self.client.remove_h: #If h is removed, replace string.
                 args[1] = Constants.remove_h_message(args[1])
+
 
             self.client.area.send_command('CT', self.client.name, args[1])
             self.client.last_ooc_message = args[1]
