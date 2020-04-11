@@ -380,3 +380,5 @@
 ### 200410a (4.2.3-post8)
 * Fixed clients who do not/cannot update their music list crashing when they attempt to join an area that no longer exists.
 * Readded description of /login to README.md
+
+### (4.2.4)
