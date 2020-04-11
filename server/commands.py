@@ -2984,11 +2984,11 @@ def ooc_cmd_make_gm(client: ClientManager.Client, arg: str):
     Constants.assert_command(client, arg, is_staff=True)
     target = Constants.parse_id(client, arg)
 
-    if target.is_gm:
-        raise ClientError('Client {} is already a GM.'.format(target.id))
     if not (client.is_cm or client.is_mod) and target not in client.get_multiclients():
         raise ClientError('You must be authorized to login as game masters players other than your '
                           'multiclients.')
+    if target.is_gm:
+        raise ClientError('Client {} is already a GM.'.format(target.id))
 
     target.login(client.server.config['gmpass'], target.auth_gm, 'game master',
                  announce_to_officers=False)

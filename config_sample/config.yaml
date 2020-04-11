@@ -40,13 +40,13 @@ modpass: Mod
 cmpass: Community Manager
 
 gmpass: Universal
-gmpass1: Sunday-Monday
-gmpass2: Monday-Tuesday
-gmpass3: Tuesday-Wednesday
-gmpass4: Wednesday-Thursday
-gmpass5: Thursday-Friday
-gmpass6: Friday-Saturday
-gmpass7: Saturday-Sunday
+gmpass1: Monday
+gmpass2: Tuesday
+gmpass3: Wednesday
+gmpass4: Thursday
+gmpass5: Friday
+gmpass6: Saturday
+gmpass7: Sunday
 
 # OOC configurations
 # motd: message sent to OOC on connection
