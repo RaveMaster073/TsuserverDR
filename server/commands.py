@@ -2966,8 +2966,10 @@ def ooc_cmd_look_set(client: ClientManager.Client, arg: str):
                           .format(client.area.id, client.get_char_name(), arg), client)
 
 def ooc_cmd_make_gm(client: ClientManager.Client, arg: str):
-    """ (MOD AND CM ONLY)
+    """ (VARYING REQUIREMENTS)
     Makes a player by ID a GM without them needing to put in a GM password.
+    Returns an error if the target is already a GM, or if the player is not community manager or
+    moderator and tries to GM a client that is not a multiclient of them.
 
     SYNTAX
     /make_gm <client_id>
@@ -2979,12 +2981,14 @@ def ooc_cmd_make_gm(client: ClientManager.Client, arg: str):
     /make_gm 3      :: Makes the client with ID 3 a GM
     """
 
-    Constants.assert_command(client, arg, is_officer=True)
-
+    Constants.assert_command(client, arg, is_staff=True)
     target = Constants.parse_id(client, arg)
 
     if target.is_gm:
         raise ClientError('Client {} is already a GM.'.format(target.id))
+    if not (client.is_cm or client.is_mod) and target not in client.get_multiclients():
+        raise ClientError('You must be authorized to login as game masters players other than your '
+                          'multiclients.')
 
     target.login(client.server.config['gmpass'], target.auth_gm, 'game master',
                  announce_to_officers=False)

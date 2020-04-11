@@ -389,5 +389,6 @@
 * Added client version to /whois
 * Warnings are now sent to players in once-locked rooms that were reloaded via /area_list
 * /whisper messages from private rooms are no longer sent to staff members
+* GMs may now /make_gm their multiclients, and their multiclients only
 * Login/logout notifications are now sent to other staff members
 * Staff login+passwords messages are now censored both in IC and OOC

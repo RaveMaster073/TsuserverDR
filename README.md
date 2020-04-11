@@ -328,6 +328,8 @@ GMs can:
     - Lists all areas that have custom descriptions.
 * **look_set** "description"
     - Sets the area's description to the given one, or restores the default one if not given.
+* **make_gm** "ID"
+    - Makes the target a GM, provided the target is a multiclient of the player.
 * **multiclients** "ID"
     - Lists all the clients opened by a target and the areas they are in.
 * **party_disband** "party ID"
