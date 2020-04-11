@@ -6442,6 +6442,36 @@ def ooc_cmd_toggle_allpasses(client: ClientManager.Client, arg: str):
     client.send_ooc('You are {} receiving autopass notifications from players without autopass.'
                     .format(status[client.get_nonautopass_autopass]))
 
+def ooc_cmd_cid(client: ClientManager.Client, arg: str):
+    """
+    Returns the client ID of the given target (number in brackets in /getarea), or the player's if
+    not given a target.
+    Returns an error if, given a target identifier, it does not match any identifiers visible to
+    the player among players in the same area.
+
+    SYNTAX
+    /cid <user_ID>
+
+    PARAMETERS
+    <user_id>: Either the client ID, character name, edited-to character, custom showname or OOC name of the intended recipient.
+
+    EXAMPLES
+    If Phantom_HD is in the same area as the player, iniswapped to Spam_HD, has client ID 3, has showname Phantom and OOC Name ThePhantom
+    /cid Phantom_HD     :: Returns 'The client ID of Phantom_HD is 3.'
+    /cid Spam_HD        :: Returns 'The client ID of Spam_HD is 3.'
+    /cid 3              :: Returns 'The client ID of 3 is 3.'
+    /cid Phantom        :: Returns 'The client ID of Phantom is 3.'
+    /cid ThePhantom     :: Returns 'The client ID of ThePhantom is 3.'
+    /cid                :: Returns 'Your client ID is 0.' (assuming your client ID is actually 0)
+    """
+
+    if not arg:
+        client.send_ooc('Your client ID is {}.'.format(client.id))
+    else:
+        cm = client.server.client_manager
+        target, _, _ = cm.get_target_public(client, arg, only_in_area=True)
+        client.send_ooc('The client ID of {} is {}.'.format(arg, target.id))
+
 def ooc_cmd_exec(client: ClientManager.Client, arg: str):
     """
     VERY DANGEROUS. SHOULD ONLY BE ENABLED FOR DEBUGGING.

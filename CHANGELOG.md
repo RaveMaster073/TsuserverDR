@@ -382,11 +382,12 @@
 * Readded description of /login to README.md
 
 ### (4.2.4)
+* Added /cid to get your (or other's) client ID.
+* Added /spectate to switch to spectator
 * Added /time_est
+* Added server configuration setting to disable ms2-prober connections being logged in server logs
 * Added client version to /whois
 * Warnings are now sent to players in once-locked rooms that were reloaded via /area_list
-* Added server configuration setting to disable ms2-prober connections being logged in server logs.
-* /whisper messages from private rooms are no longer sent to staff members.
-* Added login/logout messages from staff positions to other staff members.
-* Staff login+passwords messages are now censored both in IC and OOC. 
-* Added /spectate
+* /whisper messages from private rooms are no longer sent to staff members
+* Login/logout notifications are now sent to other staff members
+* Staff login+passwords messages are now censored both in IC and OOC

@@ -1334,7 +1334,8 @@ class ClientManager:
                         char = '{}/{}'.format(char, target.char_folder)
 
                     multiple_match_message += ('\r\n*[{}] {} ({}) (OOC: {})'
-                            .format(target.id, char, target.showname, target.name))
+                                               .format(target.id, char, target.showname,
+                                                       target.name))
 
         if not valid_targets or len(valid_targets) > 1:
             # If was able to match more than one at some point, return that
