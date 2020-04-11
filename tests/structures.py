@@ -258,7 +258,8 @@ class _TestClientManager(ClientManager):
             # Look for all officers and assert messages of this client's login
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
-                    c.assert_ooc('{} logged in as a moderator.'.format(self.name), over=True)
+                    c.assert_ooc('{} [{}] logged in as a moderator.'
+                                 .format(self.name, self.id), over=True)
             assert self.is_mod
 
         def make_cm(self, over=True):
@@ -270,8 +271,8 @@ class _TestClientManager(ClientManager):
             # Look for all officers and assert messages of this client's login
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
-                    c.assert_ooc('{} logged in as a community manager.'.format(self.name),
-                                 over=True)
+                    c.assert_ooc('{} [{}] logged in as a community manager.'
+                                 .format(self.name, self.id), over=True)
             assert self.is_cm
 
         def make_gm(self, over=True):
@@ -283,8 +284,8 @@ class _TestClientManager(ClientManager):
             # Look for all officers and assert messages of this client's login
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
-                    c.assert_ooc('{} logged in as a game master with the global pass.'
-                                 .format(self.name), over=True)
+                    c.assert_ooc('{} [{}] logged in as a game master with the global pass.'
+                                 .format(self.name, self.id), over=True)
             assert self.is_gm
 
         def make_normie(self, over=True, other_over=lambda c: True):
@@ -303,7 +304,7 @@ class _TestClientManager(ClientManager):
             # Assert command for any officers of this client's logout
             for c in self.server.client_manager.clients:
                 if (c.is_mod or c.is_cm) and c != self:
-                    c.assert_ooc('{} is no longer a {}.'.format(self.name, role),
+                    c.assert_ooc('{} [{}] is no longer a {}.'.format(self.name, self.id, role),
                                  over=other_over(c))
             assert not self.is_staff()
             assert not (self.is_mod and self.is_cm and self.is_gm)

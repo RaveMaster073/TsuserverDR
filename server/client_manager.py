@@ -890,7 +890,7 @@ class ClientManager:
             self.send_ooc('Logged in as a {}.'.format(role))
             # Filter out messages about GMs because they were called earlier in auth_gm
             if not self.is_gm and announce_to_officers:
-                self.send_ooc_others('{} logged in as a {}.'.format(self.name, role),
+                self.send_ooc_others('{} [{}] logged in as a {}.'.format(self.name, self.id, role),
                                      is_officer=True)
             logger.log_server('Logged in as a {}.'.format(role), self)
 
@@ -910,8 +910,8 @@ class ClientManager:
                 self.in_rp = False
             else:
                 if announce_to_officers:
-                    self.send_ooc_others('{} failed to login as a moderator.'.format(self.name),
-                                         is_officer=True)
+                    self.send_ooc_others('{} [{}] failed to login as a moderator.'
+                                         .format(self.name, self.id), is_officer=True)
                 raise ClientError('Invalid password.')
 
         def auth_cm(self, password, announce_to_officers=True):
@@ -924,8 +924,8 @@ class ClientManager:
                 self.in_rp = False
             else:
                 if announce_to_officers:
-                    self.send_ooc_others('{} failed to login as a community manager.'
-                                         .format(self.name), is_officer=True)
+                    self.send_ooc_others('{} [{}] failed to login as a community manager.'
+                                         .format(self.name, self.id), is_officer=True)
                 raise ClientError('Invalid password.')
 
         def auth_gm(self, password, announce_to_officers=True):
@@ -946,16 +946,16 @@ class ClientManager:
                 else:
                     g_or_daily = 'global pass'
                 if announce_to_officers:
-                    self.send_ooc_others('{} logged in as a game master with the {}.'
-                                         .format(self.name, g_or_daily), is_officer=True)
+                    self.send_ooc_others('{} [{}] logged in as a game master with the {}.'
+                                         .format(self.name, self.id, g_or_daily), is_officer=True)
                 self.is_gm = True
                 self.is_mod = False
                 self.is_cm = False
                 self.in_rp = False
             else:
                 if announce_to_officers:
-                    self.send_ooc_others('{} failed to login as a game master.'
-                                         .format(self.name), is_officer=True)
+                    self.send_ooc_others('{} [{}] failed to login as a game master.'
+                                         .format(self.name, self.id), is_officer=True)
                 raise ClientError('Invalid password.')
 
         def get_hdid(self):
