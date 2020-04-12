@@ -908,12 +908,8 @@ class ClientManager:
             self.send_ooc('Logged in as a {}.'.format(role))
             # Filter out messages about GMs because they were called earlier in auth_gm
             if not self.is_gm and announce_to_officers:
-<<<<<<< HEAD
                 self.send_ooc_others('{} [{}] logged in as a {}.'.format(self.name, self.id, role),
                                      is_officer=True)
-=======
-                self.send_ooc_others('{} logged in as a {}.'.format(self.name, role), is_officer=True)
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
             logger.log_server('Logged in as a {}.'.format(role), self)
 
             if self.area.in_zone and self.area.in_zone != self.zone_watched:
@@ -922,17 +918,6 @@ class ClientManager:
                               'notifications, start watching it with /zone_watch {}'
                               .format(zone_id, zone_id))
 
-<<<<<<< HEAD
-=======
-            # No longer bound to AFK rules
-            # Nor lurk callouts
-            for task in ['as_afk_kick', 'as_lurk']:
-                try:
-                    self.server.tasker.remove_task(self, [task])
-                except KeyError:
-                    pass
-
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
         def auth_mod(self, password, announce_to_officers=True):
             if self.is_mod:
                 raise ClientError('Already logged in.')
@@ -943,12 +928,8 @@ class ClientManager:
                 self.in_rp = False
             else:
                 if announce_to_officers:
-<<<<<<< HEAD
                     self.send_ooc_others('{} [{}] failed to login as a moderator.'
                                          .format(self.name, self.id), is_officer=True)
-=======
-                    self.send_ooc_others('{} failed to login as a moderator.'.format(self.name), is_officer=True)
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
                 raise ClientError('Invalid password.')
 
         def auth_cm(self, password, announce_to_officers=True):
@@ -961,12 +942,8 @@ class ClientManager:
                 self.in_rp = False
             else:
                 if announce_to_officers:
-<<<<<<< HEAD
                     self.send_ooc_others('{} [{}] failed to login as a community manager.'
                                          .format(self.name, self.id), is_officer=True)
-=======
-                    self.send_ooc_others('{} failed to login as a community manager.'.format(self.name), is_officer=True)
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
                 raise ClientError('Invalid password.')
 
         def auth_gm(self, password, announce_to_officers=True):
@@ -987,24 +964,16 @@ class ClientManager:
                 else:
                     g_or_daily = 'global pass'
                 if announce_to_officers:
-<<<<<<< HEAD
                     self.send_ooc_others('{} [{}] logged in as a game master with the {}.'
                                          .format(self.name, self.id, g_or_daily), is_officer=True)
-=======
-                    self.send_ooc_others('{} logged in as a game master with the {}.'.format(self.name, g_or_daily), is_officer=True)
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
                 self.is_gm = True
                 self.is_mod = False
                 self.is_cm = False
                 self.in_rp = False
             else:
                 if announce_to_officers:
-<<<<<<< HEAD
                     self.send_ooc_others('{} [{}] failed to login as a game master.'
                                          .format(self.name, self.id), is_officer=True)
-=======
-                    self.send_ooc_others('{} failed to login as a game master.'.format(self.name), is_officer=True)
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
                 raise ClientError('Invalid password.')
 
         def get_hdid(self):
@@ -1376,14 +1345,9 @@ class ClientManager:
                     if target.char_folder and target.char_folder != char: # Show iniswap if needed
                         char = '{}/{}'.format(char, target.char_folder)
 
-<<<<<<< HEAD
                     multiple_match_message += ('\r\n*[{}] {} ({}) (OOC: {})'
                                                .format(target.id, char, target.showname,
                                                        target.name))
-=======
-                    multiple_match_mes += ('\r\n*[{}] {} ({}) (OOC: {})'
-                                           .format(target.id, char, target.showname, target.name))
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
 
         if not valid_targets or len(valid_targets) > 1:
             # If was able to match more than one at some point, return that

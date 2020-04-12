@@ -88,63 +88,7 @@ class ServerError(TsuserverException):
 class PartyError(TsuserverException):
     pass
 
-<<<<<<< HEAD
 @recreate_subexceptions
-=======
-class PlayerGroupError(TsuserverException):
-    class PlayerAlreadyMemberError(TsuserverException):
-        pass
-
-    class PlayerAlreadyLeaderError(TsuserverException):
-        pass
-
-    class PlayerInAnotherGroupError(TsuserverException):
-        pass
-
-    class PlayerInNoGroupError(TsuserverException):
-        pass
-
-    class PlayerNotMemberError(TsuserverException):
-        pass
-
-    class PlayerNotLeaderError(TsuserverException):
-        pass
-
-    class GroupIsEmptyError(TsuserverException):
-        pass
-
-    class GroupIsFullError(TsuserverException):
-        pass
-
-    class ManagerTooManyGroupsError(TsuserverException):
-        pass
-
-    class ManagerDoesNotManageGroupError(TsuserverException):
-        pass
-
-class StepTimerError(TsuserverException):
-    class InvalidStepTimerValueError(TsuserverException):
-        pass
-
-    class InvalidMinTimerValueError(TsuserverException):
-        pass
-
-    class AlreadyStartedStepTimerError(TsuserverException):
-        pass
-
-    class NotStartedStepTimerError(TsuserverException):
-        pass
-
-    class AlreadyPausedStepTimerError(TsuserverException):
-        pass
-
-    class NotPausedStepTimerError(TsuserverException):
-        pass
-
-    class AlreadyCanceledStepTimerError(TsuserverException):
-        pass
-
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
 class ZoneError(TsuserverException):
     class AreaConflictError(TsuserverException):
         pass

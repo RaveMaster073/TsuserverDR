@@ -40,17 +40,10 @@ from server.zone_manager import ZoneManager
 class TsuserverDR:
     def __init__(self, protocol=None, client_manager=None, in_test=False):
         self.release = 4
-<<<<<<< HEAD
         self.major_version = 2
         self.minor_version = 4
         self.segment_version = 'a7'
         self.internal_version = 'm200411f'
-=======
-        self.major_version = 3
-        self.minor_version = 0
-        self.segment_version = 'a24'
-        self.internal_version = 'M200410a'
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
         version_string = self.get_version_string()
         self.software = 'TsuserverDR {}'.format(version_string)
         self.version = 'TsuserverDR {} ({})'.format(version_string, self.internal_version)
