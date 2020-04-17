@@ -503,7 +503,7 @@ class AreaManager:
             area: server.AreaManager.Area, optional
                 Broadcasts light change messages to chosen area. Used if
                 the initiator is elsewhere, such as in /zone_lights.
-                If active, the initiator will receive no notifications of
+                If not None, the initiator will receive no notifications of
                 light status changes.
 
             Raises
@@ -532,7 +532,7 @@ class AreaManager:
 
             # Announce light status change
             if initiator: # If a player initiated the change light sequence, send targeted messages
-                if (area == None):
+                if area is None:
                     if not initiator.is_blind:
                         initiator.send_ooc('You turned the lights {}.'.format(status[new_lights]))
                     elif not initiator.is_deaf:
