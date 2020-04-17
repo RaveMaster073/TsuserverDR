@@ -488,7 +488,7 @@ class AreaManager:
                     info += '\r\n*{}'.format(log)
             return info
 
-        def change_lights(self, new_lights, initiator=None):
+        def change_lights(self, new_lights, initiator=None, area=None):
             """
             Change the light status of the area and send related announcements.
 
@@ -500,6 +500,11 @@ class AreaManager:
                 New light status
             initiator: server.ClientManager.Client, optional
                 Client who triggered the light status change.
+            area: server.AreaManager.Area, optional
+                Broadcasts light change messages to chosen area. Used if
+                the initiator is elsewhere, such as in /zone_lights.
+                If not None, the initiator will receive no notifications of
+                light status changes.
 
             Raises
             ------
@@ -527,20 +532,21 @@ class AreaManager:
 
             # Announce light status change
             if initiator: # If a player initiated the change light sequence, send targeted messages
-                if not initiator.is_blind:
-                    initiator.send_ooc('You turned the lights {}.'.format(status[new_lights]))
-                elif not initiator.is_deaf:
-                    initiator.send_ooc('You hear a flicker.')
-                else:
-                    initiator.send_ooc('You feel a light switch was flipped.')
+                if area is None:
+                    if not initiator.is_blind:
+                        initiator.send_ooc('You turned the lights {}.'.format(status[new_lights]))
+                    elif not initiator.is_deaf:
+                        initiator.send_ooc('You hear a flicker.')
+                    else:
+                        initiator.send_ooc('You feel a light switch was flipped.')
 
                 initiator.send_ooc_others('The lights were turned {}.'.format(status[new_lights]),
-                                          is_zstaff_flex=False, in_area=True, to_blind=False)
-                initiator.send_ooc_others('You hear a flicker.', is_zstaff_flex=False, in_area=True,
+                                          is_zstaff_flex=False, in_area=area if area else True, to_blind=False)
+                initiator.send_ooc_others('You hear a flicker.', is_zstaff_flex=False, in_area=area if area else True,
                                           to_blind=True, to_deaf=False)
                 initiator.send_ooc_others('(X) {} turned the lights {}.'
                                           .format(initiator.displayname, status[new_lights]),
-                                          is_zstaff_flex=True, in_area=True)
+                                          is_zstaff_flex=True, in_area=area if area else True)
             else: # Otherwise, send generic message
                 self.broadcast_ooc('The lights were turned {}.'.format(status[new_lights]))
 

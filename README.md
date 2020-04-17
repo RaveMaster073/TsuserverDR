@@ -100,7 +100,7 @@ Additional notes are listed at the end of the command list.
 * **cleardoc**
     - Clears the doc url of the current area.
 * **cid** "ID/char name/edited-to character/showname/OOC name"
-	- Gives you the client ID of the target, or your own client ID if not given an argument.
+    - Gives you the client ID of the target, or your own client ID if not given an argument.
 * **coinflip** "call"
     - Flips a coin and returns its result, as well as whatever it is called with (e.g. a prediction, consequences for heads/tails, etc.) if given.
 * **currentmusic**
@@ -233,8 +233,8 @@ Additional notes are listed at the end of the command list.
 * **version**
     - Obtains the current version of the server software.
 * **whisper** "ID/char name/edited-to character/showname/OOC name" "message"
-	- Sends an IC private message to the target, provided they are in the area.
-	- Other people in the area are warned that a whisper has taken place (but not the message content). However, staff members do get message contents, so this command should only be used in RP settings.
+    - Sends an IC private message to the target, provided they are in the area.
+    - Other people in the area are warned that a whisper has taken place (but not the message content). However, staff members do get message contents, so this command should only be used in RP settings.
 * **zone_global**
     - Sends a message to all players in the zone you are in.
 * **8ball** "question"
@@ -310,8 +310,8 @@ GMs can:
 * **gmself**
     - Logs all opened multiclients as GM.
 * **guide** "ID/char name/edited-to character/showname/OOC name" "message"
-	- Sends an IC private 'guiding' message to the target.
-	- Unlike /whisper, other people in the area are not warned that a whisper has taken place. However, staff members do get message contents, so this command should only be used in RP settings.
+    - Sends an IC private 'guiding' message to the target.
+    - Unlike /whisper, other people in the area are not warned that a whisper has taken place. However, staff members do get message contents, so this command should only be used in RP settings.
 * **handicap** "ID" "length" "name" "announce if over"
     - Sets a movement handicap on a client by ID so that they need to wait a set amount of time in seconds between changing areas.
     - If name is given, the handicap announcement will use it as the name of the handicap.
@@ -398,6 +398,8 @@ GMs can:
     - Adds an area by name or ID to the zone you are watching.
 * **zone_delete**
     - Deletes the zone you are watching.
+* **zone_lights** "on/off"
+    - Changes the light status of every area in a zone you are watching to on or off.
 * **zone_list**
     - Lists all active zones in the server, as well as some of their details.
 * **zone_play**

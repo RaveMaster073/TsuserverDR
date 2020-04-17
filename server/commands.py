@@ -131,7 +131,6 @@ def ooc_cmd_area_kick(client: ClientManager.Client, arg: str):
     if not client.is_mod and not client.is_cm and client.area.lobby_area:
         raise ClientError('You must be authorized to kick clients in lobby areas.')
 
-    arg = arg.split(' ')
     if len(arg) == 1:
         area = client.server.area_manager.get_area_by_id(client.server.default_area)
     else:
@@ -3687,8 +3686,6 @@ def ooc_cmd_passage_clear(client: ClientManager.Client, arg: str):
     /passage_clear
     /passage_clear <area_range_start>, <area_range_end>
 
-    /passage_restore <area_range_start>, <area_range_end>
-
     PARAMETERS
     <area_range_start>: Start of area range (inclusive)
     <area_range_end>: End of area range (inclusive)
@@ -6127,13 +6124,13 @@ def ooc_cmd_zone_global(client: ClientManager.Client, arg: str):
     not part of a zone.
 
     SYNTAX
-    /zone_glabal <message>
+    /zone_global <message>
 
     PARAMETERS
     <message>: Message to be sent
 
     EXAMPLE
-    /zone_glabal Hello World      :: Sends Hello World to global chat.
+    /zone_global Hello World      :: Sends Hello World to global chat.
     """
 
     try:
@@ -6156,6 +6153,49 @@ def ooc_cmd_zone_global(client: ClientManager.Client, arg: str):
         target.send_ooc(arg, username='<dollar>ZG[{}][{}]'
                         .format(client.area.id, client.displayname),
                         pred=lambda c: not c.muted_global)
+
+def ooc_cmd_zone_lights(client: ClientManager.Client, arg: str):
+    """ (STAFF ONLY)
+    Toggles lights on or off in the background for every area in a zone. If turned off,
+    the background will change to the server's blackout background. If turned on,
+    the background will revert to the background before the blackout one.
+    If an area already has the requested light status, has a locked background, or
+    has no lights to change, the area is left alone.
+    Returns an error if the user is not watching a zone.
+
+    SYNTAX
+    /zone_lights
+
+    PARAMETERS
+    <new_status>: 'on' or 'off'
+
+    EXAMPLES
+    Assuming the user is watching z0, with areas 1-4
+    /zone_lights off    :: Turns every light off in areas 1-4.
+    """
+
+    try:
+        Constants.assert_command(client, arg, is_staff=True, parameters='>0')
+    except ArgumentError:
+        raise ArgumentError('You must specify either on or off.')
+    if arg not in ['off', 'on']:
+        raise ClientError('Expected on or off.')
+
+    if client.zone_watched:
+        target_zone = client.zone_watched.get_areas()
+        new_lights = (arg == 'on')
+    else:
+        raise ZoneError('You are not watching a zone.')
+
+    for area in target_zone:
+        if area.bg_lock or not area.has_lights:
+            continue
+        try:
+            area.change_lights(new_lights, initiator=client, area=area)
+        except AreaError:
+          pass
+
+    client.send_ooc('You have turned the lights in zone {} {}.'.format(client.zone_watched.get_id(), arg))
 
 def ooc_cmd_zone_list(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
