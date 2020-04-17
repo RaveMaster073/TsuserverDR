@@ -398,10 +398,10 @@ GMs can:
     - Adds an area by name or ID to the zone you are watching.
 * **zone_delete**
     - Deletes the zone you are watching.
-* **zone_list**
-    - Lists all active zones in the server, as well as some of their details.
 * **zone_lights** "on/off"
     - Changes the light status of every area in a zone you are watching to on or off.
+* **zone_list**
+    - Lists all active zones in the server, as well as some of their details.
 * **zone_play**
     - Plays a track in all areas in the zone you are watching.
 * **zone_remove** "area"

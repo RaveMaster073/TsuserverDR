@@ -500,9 +500,11 @@ class AreaManager:
                 New light status
             initiator: server.ClientManager.Client, optional
                 Client who triggered the light status change.
-            area: server.ClientManager.Client.area, optional
+            area: server.AreaManager.Area, optional
                 Broadcasts light change messages to chosen area. Used if
                 the initiator is elsewhere, such as in /zone_lights.
+                If active, the initiator will receive no notifications of
+                light status changes.
 
             Raises
             ------
@@ -528,14 +530,9 @@ class AreaManager:
             self.lights = new_lights
             self.change_background(intended_background, validate=False) # Allow restoring custom bg.
 
-            # for now, only zone_lights has the area command
-            # making a separate receive_notifs variable just in case other functions require
-            # notification muting, but not area broadcasting.
-            receive_notifs = (area == None)
-
             # Announce light status change
             if initiator: # If a player initiated the change light sequence, send targeted messages
-                if receive_notifs:
+                if (area == None):
                     if not initiator.is_blind:
                         initiator.send_ooc('You turned the lights {}.'.format(status[new_lights]))
                     elif not initiator.is_deaf:
