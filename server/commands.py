@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import random
 import hashlib
 import string
 import time
-import datetime
 import traceback
 
 from server import logger
@@ -212,7 +211,6 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
         except AreaError as exc:
             raise ArgumentError('The area list {} returned the following error when loading: `{}`.'
                                 .format(new_area_file, exc))
-
 
         client.send_ooc('You have loaded the area list {}.'.format(arg))
         client.send_ooc_others('The area list {} has been loaded.'.format(arg), is_staff=False)
@@ -2775,12 +2773,10 @@ def ooc_cmd_logout(client: ClientManager.Client, arg: str):
     if client.area.evidence_mod == 'HiddenCM':
         client.area.broadcast_evidence_list()
 
-    # Update the music list to show reachable areas, activate the AFK timer
-    # and lurk callout if there is one
+    # Update the music list to show reachable areas and activate the AFK timer
     client.reload_music_list()
     client.server.tasker.create_task(client, ['as_afk_kick', client.area.afk_delay,
                                               client.area.afk_sendto])
-    client.check_lurk()
 
     # If using a character restricted in the area, switch out
     if client.get_char_name() in client.area.restricted_chars:
@@ -3690,6 +3686,8 @@ def ooc_cmd_passage_clear(client: ClientManager.Client, arg: str):
     /passage_clear
     /passage_clear <area_range_start>, <area_range_end>
 
+    /passage_restore <area_range_start>, <area_range_end>
+    
     PARAMETERS
     <area_range_start>: Start of area range (inclusive)
     <area_range_end>: End of area range (inclusive)
@@ -3735,8 +3733,11 @@ def ooc_cmd_passage_restore(client: ClientManager.Client, arg: str):
     /passage_restore 16, 116        :: Restores the passages starting in areas 16 through 116.
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='<3', split_commas=True)
+    if not client.is_staff():
+        raise ClientError('You must be authorized to do that.')
     areas = arg.split(', ')
+    if len(areas) > 2:
+        raise ClientError('This command takes at most two arguments.')
 
     areas = Constants.parse_two_area_names(client, areas)
 
@@ -3750,7 +3751,6 @@ def ooc_cmd_passage_restore(client: ClientManager.Client, arg: str):
     else:
         client.send_ooc('Passages in areas {} through {} have been restored to their original '
                         'state.'.format(areas[0].name, areas[1].name))
-
 
 def ooc_cmd_ping(client: ClientManager.Client, arg: str):
     """
@@ -4238,6 +4238,8 @@ def ooc_cmd_rpmode(client: ClientManager.Client, arg: str):
         raise ArgumentError('You must specify either on or off.')
     if not client.server.config['rp_mode_enabled']:
         raise ClientError("RP mode is disabled in this server.")
+    if len(arg) == 0:
+        raise ArgumentError('You must specify either on or off.')
 
     if arg == 'on':
         client.server.rp_mode = True
@@ -4313,7 +4315,6 @@ def ooc_cmd_scream(client: ClientManager.Client, arg: str):
                                .format(client.displayname, arg, client.area.id),
                                is_zstaff_flex=True, pred=lambda c: not c.muted_global)
 
-    client.check_lurk()
     logger.log_server('[{}][{}][SCREAM]{}.'.format(client.area.id, client.get_char_name(), arg),
                       client)
 
@@ -4628,6 +4629,8 @@ def ooc_cmd_showname_freeze(client: ClientManager.Client, arg: str):
     client.send_ooc_others('{} has {} all shownames.'
                            .format(client.name, status[client.server.showname_freeze]),
                            is_staff=True)
+    logger.log_server('{} has {} all shownames.'
+                      .format(client.name, status[client.server.showname_freeze]), client)
 
 def ooc_cmd_showname_history(client: ClientManager.Client, arg: str):
     """ (MOD ONLY)
@@ -4816,7 +4819,8 @@ def ooc_cmd_spectate(client: ClientManager.Client, arg):
     /spectate                       :: Returns "You are now spectating." or "You are already spectating."
     """
 
-    Constants.assert_command(client, arg, parameters='=0')
+    if len(arg) != 0:
+        client.send_ooc('This command has no arguments.')
 
     # If user is already SPECTATOR, no need to change.
     if client.char_id == -1:
@@ -5847,7 +5851,6 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
         client.send_ooc('You whispered `{}` to {}.'.format(final_message, final_target))
         client.send_ic(msg=msg, pos=client.pos, cid=client.char_id, showname=client.showname,
                        bypass_replace=False, bypass_deafened_starters=True)
-        client.check_lurk()
 
         target.send_ooc('{} whispered something to you.'.format(final_sender), to_deaf=False)
         target.send_ooc('{} seemed to whisper something to you, but you could not make it out.'
@@ -5878,8 +5881,6 @@ def ooc_cmd_whisper(client: ClientManager.Client, arg: str):
         client.send_ooc('You spooked {} by whispering `{}` to them while sneaking.'
                         .format(final_target, final_message))
         client.send_ic(msg=msg, pos='jud', showname='???', bypass_deafened_starters=True)
-        client.check_lurk()
-
         # Note this uses pos='jud' instead of pos=client.pos. This is to mask the position of the
         # sender, so that the target cannot determine who it is based on knowing usual positions
         # of people.
@@ -6125,13 +6126,13 @@ def ooc_cmd_zone_global(client: ClientManager.Client, arg: str):
     not part of a zone.
 
     SYNTAX
-    /zone_global <message>
+    /zone_glabal <message>
 
     PARAMETERS
     <message>: Message to be sent
 
     EXAMPLE
-    /zone_global Hello World      :: Sends Hello World to global chat.
+    /zone_glabal Hello World      :: Sends Hello World to global chat.
     """
 
     try:

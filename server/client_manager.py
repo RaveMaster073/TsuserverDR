@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 import datetime
 import time
+import warnings
 
 from server import client_changearea
 from server import fantacrypt
@@ -127,24 +128,16 @@ class ClientManager:
             else:
                 self.send_raw_message('{}#%'.format(command))
 
-        def send_ooc(self, msg, username=None, allow_empty=False,
-                     is_staff=None, is_officer=None, in_area=None, not_to=None, part_of=None,
-                     to_blind=None, to_deaf=None, is_zstaff=None, is_zstaff_flex=None,
-                     pred=None):
-            if pred is None:
-                pred = lambda x: True
-            if not_to is None:
-                not_to = set()
+        def send_ooc(self, msg, username=None, allow_empty=False, is_staff=None, is_officer=None,
+                     in_area=None, not_to=None, to_blind=None, to_deaf=None, pred=None):
             if not allow_empty and not msg:
                 return
             if username is None:
                 username = self.server.config['hostname']
 
             cond = Constants.build_cond(self, is_staff=is_staff, is_officer=is_officer,
-                                        in_area=in_area, not_to=not_to, part_of=part_of,
-                                        to_blind=to_blind, to_deaf=to_deaf,
-                                        is_zstaff=is_zstaff, is_zstaff_flex=is_zstaff_flex,
-                                        pred=pred)
+                                        in_area=in_area, not_to=not_to, to_blind=to_blind,
+                                        to_deaf=to_deaf, pred=pred)
 
             if cond(self):
                 self.send_command('CT', username, msg)
@@ -171,8 +164,8 @@ class ClientManager:
             self.server.make_all_clients_do("send_ooc", msg, pred=cond, allow_empty=allow_empty,
                                             username=username)
 
-        def send_ic(self, params=None, sender=None, pred=None, not_to=None, gag_replaced=False,
-                    is_staff=None, in_area=None, to_blind=None, to_deaf=None,
+        def send_ic(self, ic_params=None, params=None, sender=None, pred=None, not_to=None,
+                    gag_replaced=False, is_staff=None, in_area=None, to_blind=None, to_deaf=None,
                     bypass_replace=False, bypass_deafened_starters=False,
                     msg=None, pos=None, cid=None, ding=None, color=None, showname=None):
 
@@ -180,16 +173,24 @@ class ClientManager:
             # self is who is receiving the IC message at this particular moment
 
             # Assert correct call to the function
-            if params is None and msg is None:
+            if ic_params is None and params is None and msg is None:
                 raise ValueError('Expected message.')
+
+            if ic_params is not None and params is not None:
+                raise ValueError('Conflicting ic_params and params')
+
+            if ic_params is not None:
+                self.ic_params_deprecation_warning()
+                params = {self.packet_handler.MS_OUTBOUND.value[i][0]: ic_params[i]
+                          for i in range(len(ic_params))}
 
             # Fill in defaults
             # Expected behavior is as follows:
-            #  If params is None, then the sent IC message will only include custom details
+            #  If ic_params is None, then the sent IC message will only include custom details
             #  about the ding and the message, everything else is fixed. However, sender details
             #  are considered when replacing the parameters based on sender/receiver's properties
-            #  If params is not None, then the sent IC message will use the parameters given in
-            #  params, and use the properties of sender to replace the parameters if needed.
+            #  If ic_params is not None, then the sent IC message will use the parameters given in
+            #  ic_params, and use the properties of sender to replace the parameters if needed.
 
             pargs = {x: y for (x, y) in self.packet_handler.MS_OUTBOUND.value}
             if params is None:
@@ -307,19 +308,20 @@ class ClientManager:
 
             self.send_command('MS', *to_send)
 
-        def send_ic_others(self, params=None, sender=None, bypass_replace=False, pred=None,
-                           not_to=None, gag_replaced=False, is_staff=None, in_area=None,
+        def send_ic_others(self, ic_params=None, params=None, sender=None, bypass_replace=False,
+                           pred=None, not_to=None, gag_replaced=False, is_staff=None, in_area=None,
                            to_blind=None, to_deaf=None,
                            msg=None, pos=None, cid=None, ding=None, color=None, showname=None):
-
+            if ic_params is not None:
+                self.ic_params_deprecation_warning()
             if not_to is None:
                 not_to = {self}
             else:
                 not_to = not_to.union({self})
 
             for c in self.server.client_manager.clients:
-                c.send_ic(params=None, sender=sender, bypass_replace=bypass_replace, pred=pred,
-                          not_to=not_to, gag_replaced=gag_replaced, is_staff=is_staff,
+                c.send_ic(ic_params=None, params=None, sender=sender, bypass_replace=bypass_replace,
+                          pred=pred, not_to=not_to, gag_replaced=gag_replaced, is_staff=is_staff,
                           in_area=in_area, to_blind=to_blind, to_deaf=to_deaf,
                           msg=msg, pos=pos, cid=cid, ding=ding, color=color, showname=showname)
 
@@ -367,17 +369,6 @@ class ClientManager:
                 # Now bound by AFK rules
                 self.server.tasker.create_task(self, ['as_afk_kick', self.area.afk_delay,
                                                       self.area.afk_sendto])
-                # And to lurk callouts, if any, provided not staff member
-                self.check_lurk()
-
-            elif self.char_id >= 0 and char_id < 0: # Now a spectator?
-                # No longer bound to AFK rules
-                try:
-                    self.server.tasker.remove_task(self, ['as_afk_kick'])
-                except KeyError:
-                    pass
-                # And to lurk callouts
-                self.check_lurk()
 
             old_char = self.get_char_name()
             self.char_id = char_id
@@ -464,15 +455,6 @@ class ClientManager:
         def notify_change_area(self, area, old_char, ignore_bleeding=False, just_me=False):
             notifier = self.area_changer.notify_change_area
             notifier(area, old_char, ignore_bleeding=ignore_bleeding, just_me=just_me)
-
-        def check_lurk(self):
-            if self.area.lurk_length > 0 and not self.is_staff() and self.char_id >= 0:
-                self.server.tasker.create_task(self, ['as_lurk', self.area.lurk_length])
-            else: # Otherwise, cancel any existing lurk, if there exists
-                try:
-                    self.server.tasker.remove_task(self, ['as_lurk'])
-                except KeyError:
-                    pass
 
         def change_area(self, area, override_all=False, override_passages=False,
                         override_effects=False, ignore_bleeding=False, ignore_followers=False,
@@ -1092,6 +1074,12 @@ class ClientManager:
                     .format(self.id, self.ipid, self.name, self.get_char_name(), self.showname,
                             self.is_staff(), self.area.id))
 
+        def ic_params_deprecation_warning(self):
+            message = ('Code is using old IC params syntax (using ic_params as an argument). '
+                       'Please change it (or ask your server developer) so that it uses '
+                       'params instead (pending removal in 4.2).')
+            warnings.warn(message, category=UserWarning, stacklevel=3)
+
     def __init__(self, server, client_obj=None):
         if client_obj is None:
             self.client_obj = self.Client
@@ -1263,7 +1251,7 @@ class ClientManager:
         """
 
         split_identifier = identifier.split(' ')
-        multiple_match_mes = ''
+        multiple_match_message = ''
         valid_targets = list()
 
         def _discard_sneaked_if_needed(targets):
@@ -1310,10 +1298,10 @@ class ClientManager:
             # Otherwise, other identifiers may not be unique, so consider all possibilities
             # Pretend the identity is a character name, iniswapped to folder, a showname or OOC name
             possibilities = [
-                (TargetType.CHAR_NAME, lambda target: target.get_char_name()),
-                (TargetType.CHAR_FOLDER, lambda target: target.char_folder),
-                (TargetType.SHOWNAME, lambda target: target.showname),
-                (TargetType.OOC_NAME, lambda target: target.name)]
+                    (TargetType.CHAR_NAME, lambda target: target.get_char_name()),
+                    (TargetType.CHAR_FOLDER, lambda target: target.char_folder),
+                    (TargetType.SHOWNAME, lambda target: target.showname),
+                    (TargetType.OOC_NAME, lambda target: target.name)]
             targets = set()
 
             # Match against everything
@@ -1339,7 +1327,7 @@ class ClientManager:
             else:
                 # Otherwise, our identity guess was not precise enough, so keep track of that
                 # for later and continue with the for loop
-                multiple_match_mes = 'Multiple targets match identifier `{}`'.format(identity)
+                multiple_match_message = 'Multiple targets match identifier `{}`'.format(identity)
                 for target in sorted(list(targets), key=lambda c: c.id):
                     char = target.get_char_name()
                     if target.char_folder and target.char_folder != char: # Show iniswap if needed
@@ -1351,8 +1339,8 @@ class ClientManager:
 
         if not valid_targets or len(valid_targets) > 1:
             # If was able to match more than one at some point, return that
-            if multiple_match_mes:
-                raise ClientError(multiple_match_mes)
+            if multiple_match_message:
+                raise ClientError(multiple_match_message)
             # Otherwise, show that no match was ever found
             raise ClientError('No targets with identifier `{}` found.'.format(identifier))
 

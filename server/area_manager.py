@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ all necessary actions in order to simulate different rooms.
 
 import asyncio
 import time
+import yaml
 
 from server import logger
 from server.constants import Constants
@@ -82,7 +83,6 @@ class AreaManager:
             self.last_ic_messages = list()
             self.parties = set()
             self.dicelog = list()
-            self.lurk_length = 0
             self._in_zone = None
 
             self.name = parameters['area']
@@ -234,8 +234,6 @@ class AreaManager:
                     c.send_command('BN', self.server.config['blackout_background'])
                 else:
                     c.send_command('BN', bg)
-
-
 
         def get_chars_unusable(self, allow_restricted=False, more_unavail_chars=None):
             """
@@ -620,7 +618,7 @@ class AreaManager:
                     raise
                 name, length = name, -1
 
-            self.play_music(name, client.char_id, length, showname=client.showname)
+            self.play_music(name, client.char_id, length)
             self.add_music_playing(client, name)
 
             logger.log_server('[{}][{}]Changed music to {}.'
@@ -632,7 +630,7 @@ class AreaManager:
                 client.send_ooc_others('(X) {} revealed themselves by playing music ({}).'
                                        .format(client.displayname, client.area.id), is_zstaff=True)
 
-        def play_music(self, name, cid, length=-1, showname=''):
+        def play_music(self, name, cid, length=-1):
             """
             Start playing a music track in an area.
 
@@ -647,7 +645,7 @@ class AreaManager:
                 Defaults to -1 (no looping).
             """
 
-            self.send_command('MC', name, cid, showname)
+            self.send_command('MC', name, cid)
 
             if self.music_looper:
                 self.music_looper.cancel()

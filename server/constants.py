@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ class Clients():
             ('pos', 'jud'), #5
             ('sfx', 0), #6
             ('anim_type', 0), #7
-            ('cid', -1), #8
+            ('cid', 0), #8
             ('sfx_delay', 0), #9
             ('button', 0), #10
             ('evidence', 0), #11

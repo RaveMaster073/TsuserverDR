@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -492,7 +492,6 @@ class ClientChangeArea:
         """
 
         client = self.client
-        old_area = client.area
 
         if not override_all:
             # All the code that could raise errors goes here
@@ -547,7 +546,7 @@ class ClientChangeArea:
             if not ignore_notifications:
                 client.send_ooc('Changed area to {}.[{}]'.format(area.name, area.status))
                 logger.log_server('[{}]Changed area from {} ({}) to {} ({}).'
-                                  .format(client.get_char_name(), old_area.name, old_area.id,
+                                  .format(client.get_char_name(), client.area.name, client.area.id,
                                           area.name, area.id), client)
                 #logger.log_rp('[{}]Changed area from {} ({}) to {} ({}).'
                 #              .format(client.get_char_name(), old_area.name, old_area.id,
@@ -555,7 +554,7 @@ class ClientChangeArea:
 
                 client.notify_change_area(area, old_dname, ignore_bleeding=ignore_bleeding)
 
-        old_area.remove_client(client)
+        client.area.remove_client(client)
         client.area = area
         area.new_client(client)
 
@@ -563,15 +562,12 @@ class ClientChangeArea:
         client.send_command('HP', 2, client.area.hp_pro)
         client.send_command('BN', client.area.background)
         client.send_command('LE', *client.area.get_evidence_list(client))
-        client.send_ic(msg='', bypass_replace=True) # Blankpost to simulate area change
 
         if client.followedby and not ignore_followers and not override_all:
             for c in client.followedby:
                 c.follow_area(area)
 
         client.reload_music_list() # Update music list to include new area's reachable areas
-        # If new area has lurk callout timer, reset it to that, provided it makes sense
-        client.check_lurk()
         client.server.tasker.create_task(client, ['as_afk_kick', area.afk_delay, area.afk_sendto])
         # Try and restart handicap if needed
         try:
@@ -583,14 +579,3 @@ class ClientChangeArea:
             client.server.tasker.create_task(client,
                                              ['as_handicap', time.time(), length, name,
                                               announce_if_over])
-
-        # For old alrea, check if there are no remaining clients, and if so, cancel any existing
-        # lurk callout timer that may have been imposed on the area
-        if not old_area.clients and old_area.lurk_length > 0:
-            old_area.lurk_length = 0
-            mes = ('(X) The lurk callout timer in area {} has been cancelled as there is no one '
-                   'left there.'.format(old_area.name))
-            client.send_ooc(mes, is_zstaff_flex=old_area)
-            client.send_ooc_others(mes, is_zstaff_flex=old_area)
-
-

@@ -100,7 +100,7 @@ Additional notes are listed at the end of the command list.
 * **cleardoc**
     - Clears the doc url of the current area.
 * **cid** "ID/char name/edited-to character/showname/OOC name"
-	- Gives you the client ID of the target, or your own client ID if not given an argument.
+    - Gives you the client ID of the target, or your own client ID if not given an argument.
 * **coinflip** "call"
     - Flips a coin and returns its result, as well as whatever it is called with (e.g. a prediction, consequences for heads/tails, etc.) if given.
 * **currentmusic**

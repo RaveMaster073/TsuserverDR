@@ -1,7 +1,7 @@
 # TsuserverDR, a Danganronpa Online server based on tsuserver3, an Attorney Online server
 #
 # Copyright (C) 2016 argoneus <argoneuscze@gmail.com> (original tsuserver3)
-# Current project leader: 2018-20 Chrezm/Iuvee <thechrezm@gmail.com>
+# Current project leader: 2018-19 Chrezm/Iuvee <thechrezm@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,16 +38,79 @@ def do_command_deprecated(command, client, arg):
                     'Please use /{} next time.'.format(command))
     do_command(command, client, arg)
 
-def ooc_cmd_showname_list(client, arg):
-    """
-    Alias for /showname_areas.
-    """
-
-    do_command('showname_areas', client, arg)
-
 def ooc_cmd_zg(client, arg):
     """
     Alias for /zone_global.
     """
 
     do_command('zone_global', client, arg)
+
+def ooc_cmd_allow_iniswap(client, arg):
+    """
+    Deprecated for /can_iniswap.
+    """
+
+    do_command_deprecated('can_iniswap', client, arg)
+
+def ooc_cmd_delete_areareachlock(client, arg):
+    """
+    Deprecated for /passage_clear.
+    """
+
+    do_command_deprecated('passage_clear', client, arg)
+
+def ooc_cmd_mutepm(client, arg):
+    """
+    Deprecated for /toggle_pm.
+    """
+
+    do_command_deprecated('toggle_pm', client, arg)
+
+def ooc_cmd_restore_areareachlock(client, arg):
+    """
+    Deprecated for /passage_restore.
+    """
+
+    do_command_deprecated('passage_restore', client, arg)
+
+def ooc_cmd_showname_list(client, arg):
+    """
+    Deprecated for /showname_areas.
+    """
+
+    do_command_deprecated('showname_areas', client, arg)
+
+def ooc_cmd_toggle_areareachlock(client, arg):
+    """
+    Deprecated for /can_passagelock.
+    """
+
+    do_command_deprecated('can_passagelock', client, arg)
+
+def ooc_cmd_toggleglobal(client, arg):
+    """
+    Deprecated for /toggle_global.
+    """
+
+    do_command_deprecated('toggle_global', client, arg)
+
+def ooc_cmd_toggle_rollp(client, arg):
+    """
+    Deprecated for /can_rollp.
+    """
+
+    do_command_deprecated('can_rollp', client, arg)
+
+def ooc_cmd_toggle_rpgetarea(client, arg):
+    """
+    Deprecated for /can_rpgetarea.
+    """
+
+    do_command_deprecated('can_rpgetarea', client, arg)
+
+def ooc_cmd_toggle_rpgetareas(client, arg):
+    """
+    Deprecated for /can_rpgetareas.
+    """
+
+    do_command_deprecated('can_rpgetareas', client, arg)
