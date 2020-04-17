@@ -372,7 +372,6 @@ class TestAuthorization_04_Integration(_TestAuthorization):
         self.c1.assert_ooc('{} [{}] logged in as a game master with the global pass.'
                            .format(self.c0.name, self.c0.id), over=True)
         self.assertTrue(self.c0.is_gm)
-        self.c1.assert_ooc('{} logged in as a game master with the global pass.'.format(self.c0.name), over=True)
 
         self.c0.ooc('/loginrp {}'.format(self.gmpass))
         self.c0.assert_ooc('Already logged in.', over=True)
@@ -384,7 +383,6 @@ class TestAuthorization_04_Integration(_TestAuthorization):
         self.c1.assert_ooc('{} [{}] logged in as a moderator.'
                            .format(self.c2.name, self.c2.id), over=True)
         self.assertTrue(self.c2.is_mod)
-        self.c1.assert_ooc('{} logged in as a moderator.'.format(self.c2.name), over=True)
 
         self.c2.ooc('/login {}'.format(self.modpass))
         self.c2.assert_ooc('Already logged in.', over=True)
@@ -413,8 +411,6 @@ class TestAuthorization_04_Integration(_TestAuthorization):
         self.assertFalse(self.c0.is_gm)
         self.assertTrue(self.c1.is_cm)
         self.assertTrue(self.c2.is_mod)
-        self.c1.assert_ooc('{} is no longer a game master.'.format(self.c0.name), over=True)
-        self.c2.assert_ooc('{} is no longer a game master.'.format(self.c0.name), over=True)
 
         self.c0.ooc('/logout')
         self.c0.assert_ooc('You must be authorized to do that.', ooc_over=True)
@@ -436,7 +432,6 @@ class TestAuthorization_04_Integration(_TestAuthorization):
         self.assertFalse(self.c0.is_gm)
         self.assertFalse(self.c1.is_cm)
         self.assertTrue(self.c2.is_mod)
-        self.c2.assert_ooc('{} is no longer a community manager.'.format(self.c1.name), over=True)
 
         self.c2.ooc('/logout')
         self.c2.assert_ooc('You are no longer logged in.', ooc_over=True)

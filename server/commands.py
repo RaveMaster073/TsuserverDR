@@ -2762,7 +2762,6 @@ def ooc_cmd_logout(client: ClientManager.Client, arg: str):
     else:
         role = 'game master'
 
-    client.send_ooc_others('{} is no longer a {}.'.format(client.name, role), is_officer=True)
     client.is_mod = False
     client.is_gm = False
     client.is_cm = False
@@ -6126,13 +6125,13 @@ def ooc_cmd_zone_global(client: ClientManager.Client, arg: str):
     not part of a zone.
 
     SYNTAX
-    /zone_glabal <message>
+    /zone_global <message>
 
     PARAMETERS
     <message>: Message to be sent
 
     EXAMPLE
-    /zone_glabal Hello World      :: Sends Hello World to global chat.
+    /zone_global Hello World      :: Sends Hello World to global chat.
     """
 
     try:
@@ -6155,6 +6154,47 @@ def ooc_cmd_zone_global(client: ClientManager.Client, arg: str):
         target.send_ooc(arg, username='<dollar>ZG[{}][{}]'
                         .format(client.area.id, client.displayname),
                         pred=lambda c: not c.muted_global)
+
+def ooc_cmd_zone_lights(client: ClientManager.Client, arg: str):
+    """ (STAFF ONLY)
+    Toggles lights on or off in the background for every area in a zone. If turned off,
+    the background will change to the server's blackout background. If turned on,
+    the background will revert to the background before the blackout one.
+    If an area already has the requested light status, the area is left alone.
+    Returns an error if the user is not watching a zone.
+
+    SYNTAX
+    /zone_lights
+
+    PARAMETERS
+    <new_status>: 'on' or 'off'
+
+    EXAMPLES
+    Assuming the user is watching z0, with areas 1-4
+    /zone_lights off    :: Turns every light off in areas 1-4.
+    """
+    try:
+        Constants.assert_command(client, arg, is_staff=True, parameters='>0')
+    except ArgumentError:
+        raise ArgumentError('You must specify either on or off.')
+    if arg not in ['off', 'on']:
+        raise ClientError('Expected on or off.')
+
+    if client.zone_watched:
+        target_zone = client.zone_watched.get_areas()
+        new_lights = (arg == 'on')
+    else:
+        raise ZoneError('You are not watching a zone.')
+
+    for area in target_zone:
+        if area.bg_lock or not area.has_lights:
+            continue
+        try:
+            area.change_lights(new_lights, initiator=client, area=area)
+        except AreaError:
+          pass
+
+    client.send_ooc('You have turned the lights in zone {} {}.'.format(client.zone_watched.get_id(), arg))
 
 def ooc_cmd_zone_list(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
@@ -6473,89 +6513,6 @@ def ooc_cmd_cid(client: ClientManager.Client, arg: str):
         cm = client.server.client_manager
         target, _, _ = cm.get_target_public(client, arg, only_in_area=True)
         client.send_ooc('The client ID of {} is {}.'.format(arg, target.id))
-
-def ooc_cmd_lurk(client: ClientManager.Client, arg: str):
-    """ (STAFF ONLY)
-    Initiates an area lurk callout timer in the area so that non-spectator regular players who do
-    not speak IC after a set amount of seconds are called out in OOC to other players in the area
-    (but not themselves).
-    Actions that reset a player's personal callout timer are: speaking IC (even if gagged), using
-    /whisper or /guide, changing character, changing area and switching to spectator.
-    Actions that start a player's personal callout timer are: moving to an area with an active lurk
-    callout timer, switching from spectator to a character, or logging out from a ranked position.
-    Deaf and blind players in the area do not receive callout notifications from other players.
-    If a called out player is gagged, a special message is sent instead.
-    If an area had an active lurk callout timer and all players leave the area, the lurk callout
-    timer is deactivated and no players will be subject to one when moving to the area until a new
-    area lurk callout timer is started.
-    If an active area lurk callout timer is present when running the command, it will overwrite
-    the existing area lurk callout timer and reset all valid targets' callout timers.
-    Returns an error if the lurk callout length is non-positive or exceeds the server limit (6
-    hours).
-
-    SYNTAX
-    /lurk <length>
-
-    PARAMETERS
-    <length>: Area lurk callout time length (in seconds)
-
-    EXAMPLES
-    /lurk 60    :: Sets a 60-second area lurk callout timer, players who remain silent for a minute will be called out
-    /lurk 2     :: Sets a 2-second area lurk callout timer, players who remain silent for 2 seconds will be called out
-    """
-
-    Constants.assert_command(client, arg, is_staff=True, parameters='=1')
-
-    # Check if valid length and convert to seconds
-    lurk_length = Constants.parse_time_length(arg) # Also internally validates
-    client.area.lurk_length = lurk_length
-
-    for c in client.area.clients:
-        c.check_lurk()
-
-    client.send_ooc('(X) You have enabled a lurk callout timer of length {} seconds in this area.'
-                    .format(lurk_length))
-    client.send_ooc_others('(X) {} has enabled a lurk callout timer of length {} seconds in your '
-                           'area.'.format(client.name, lurk_length),
-                           is_zstaff_flex=True, in_area=True)
-    client.send_ooc_others('(X) {} has enabled a lurk callout timer of length {} seconds in area '
-                           '{} ({}).'
-                           .format(client.name, lurk_length, client.area.name, client.area.id),
-                           is_zstaff_flex=True, in_area=False)
-
-def ooc_cmd_lurk_cancel(client: ClientManager.Client, arg: str):
-    """ (STAFF ONLY)
-    Cancels an existing area lurk callout timer in the area, and all non-spectator regular players'
-    personal lurk callout timers in the area.
-    Returns an error if no area lurk callout timer is active in the area.
-
-    SYNTAX
-    /lurk_cancel
-
-    PARAMETERS
-    None
-
-    EXAMPLE
-    For current area with an active 10-second area lurk callout timer
-    /lurk_cancel    :: Cancels the area lurk callout timer, players may now remain silent for 10 seconds and not be called out.
-    """
-
-    Constants.assert_command(client, arg, is_staff=True)
-
-    if client.area.lurk_length == 0:
-        raise ClientError('This area has no active lurk callout timer.')
-
-    client.area.lurk_length = 0
-    # Cancel all clients who have active lurk callout timers in the area
-    for c in client.area.clients:
-        c.check_lurk()
-
-    client.send_ooc('(X) You have canceled the lurk callout timer in this area.')
-    client.send_ooc_others('(X) {} has canceled the lurk callout timer in your area.'
-                           .format(client.name), is_zstaff_flex=True, in_area=True)
-    client.send_ooc_others('(X) {} has canceled the lurk callout timer in area {} ({}).'
-                           .format(client.name, client.area.name, client.area.id),
-                           is_zstaff_flex=True, in_area=False)
 
 def ooc_cmd_exec(client: ClientManager.Client, arg: str):
     """

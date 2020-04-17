@@ -233,8 +233,8 @@ Additional notes are listed at the end of the command list.
 * **version**
     - Obtains the current version of the server software.
 * **whisper** "ID/char name/edited-to character/showname/OOC name" "message"
-	- Sends an IC private message to the target, provided they are in the area.
-	- Other people in the area are warned that a whisper has taken place (but not the message content). However, staff members do get message contents, so this command should only be used in RP settings.
+    - Sends an IC private message to the target, provided they are in the area.
+    - Other people in the area are warned that a whisper has taken place (but not the message content). However, staff members do get message contents, so this command should only be used in RP settings.
 * **zone_global**
     - Sends a message to all players in the zone you are in.
 * **8ball** "question"
@@ -310,8 +310,8 @@ GMs can:
 * **gmself**
     - Logs all opened multiclients as GM.
 * **guide** "ID/char name/edited-to character/showname/OOC name" "message"
-	- Sends an IC private 'guiding' message to the target.
-	- Unlike /whisper, other people in the area are not warned that a whisper has taken place. However, staff members do get message contents, so this command should only be used in RP settings.
+    - Sends an IC private 'guiding' message to the target.
+    - Unlike /whisper, other people in the area are not warned that a whisper has taken place. However, staff members do get message contents, so this command should only be used in RP settings.
 * **handicap** "ID" "length" "name" "announce if over"
     - Sets a movement handicap on a client by ID so that they need to wait a set amount of time in seconds between changing areas.
     - If name is given, the handicap announcement will use it as the name of the handicap.
@@ -328,15 +328,8 @@ GMs can:
     - Lists all areas that have custom descriptions.
 * **look_set** "description"
     - Sets the area's description to the given one, or restores the default one if not given.
-<<<<<<< HEAD
 * **make_gm** "ID"
     - Makes the target a GM, provided the target is a multiclient of the player.
-=======
-* **lurk** "length"
-    - Sets the area's lurk callout timer to the given length, so players who remain silent for that long are called out in OOC.
-* **lurk_cancel**
-    - Cancels the area's lurk callout timer if there is one active.
->>>>>>> 3944601df409de2ccc6aecfb7167b09fbc0c77bd
 * **multiclients** "ID"
     - Lists all the clients opened by a target and the areas they are in.
 * **party_disband** "party ID"
@@ -407,6 +400,8 @@ GMs can:
     - Deletes the zone you are watching.
 * **zone_list**
     - Lists all active zones in the server, as well as some of their details.
+* **zone_lights** "on/off"
+    - Changes the light status of every area in a zone you are watching to on or off.
 * **zone_play**
     - Plays a track in all areas in the zone you are watching.
 * **zone_remove** "area"

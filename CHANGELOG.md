@@ -392,3 +392,4 @@
 * GMs may now /make_gm their multiclients, and their multiclients only
 * Login/logout notifications are now sent to other staff members
 * Staff login+passwords messages are now censored both in IC and OOC
+* Added /zone_lights to turn the lights of every area in your zone on or off.
