@@ -539,6 +539,11 @@ Commands without (D) are aliases to commands and can be freely used (subject to 
 * **mutepm** (D: Aug.19.19): Same as /toggle_pm.
 * **toggleglobal** (D: Jul.15.19): Same as /toggle_global.
 * **showname_list** (D: Aug.19.19): Same as /showname_areas.
+* **sa**: Same as /showname_area.
+* **sas**: Same as /showname_areas.
+* **shout**: Same as /scream.
+* **unsneak**: Same as /reveal.
+* **yell**: Same as /scream.
 * **zg**: Same as /zone_global.
 
 #### GM+
