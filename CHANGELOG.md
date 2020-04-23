@@ -393,3 +393,10 @@
 * Login/logout notifications are now sent to other staff members
 * Staff login+passwords messages are now censored both in IC and OOC
 * Added /zone_lights to turn the lights of every area in your zone on or off
+* Added:
+  - /sa (Alias for /showname_area)
+  - /sas (Alias for /showname_areas)
+  - /shout (Alias for /scream)
+  - /unsneak (Alias for /reveal)
+  - /yell (Alias for /scream)
+* Added best effort support for Attorney Online 2.7

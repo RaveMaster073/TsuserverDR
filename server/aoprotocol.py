@@ -232,12 +232,15 @@ class AOProtocol(asyncio.Protocol):
 
         self.client.is_ao2 = True
         self.client.send_command('FL', 'yellowtext', 'customobjections', 'flipping', 'fastloading',
-                                 'noencryption', 'deskmod', 'evidence', 'cccc_ic_support')
+                                 'noencryption', 'deskmod', 'evidence', 'cccc_ic_support',
+                                 'looping_sfx')
 
         if release == 2 and major >= 8: # KFO
             self.client.packet_handler = Clients.ClientKFO2d8
-        elif release == 2 and major >= 6: # AO 2.6
+        elif release == 2 and major == 6: # AO 2.6
             self.client.packet_handler = Clients.ClientAO2d6
+        elif release == 2 and major == 7: # AO 2.7
+            self.client.packet_handler = Clients.ClientAO2d7
         else:
             # Not really needed, added here for the sake of completeness
             # As this is the default packet_handler
