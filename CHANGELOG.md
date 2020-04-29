@@ -381,6 +381,9 @@
 * Fixed clients who do not/cannot update their music list crashing when they attempt to join an area that no longer exists.
 * Readded description of /login to README.md
 
+### 200428a (4.2.3-post9)
+* Fixed incorrect error messages being sent in case the server's system fails to open an area list or music list file.
+
 ### (4.2.4)
 * Added /cid to get your (or other's) client ID.
 * Added /spectate to switch to spectator
