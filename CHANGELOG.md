@@ -385,6 +385,8 @@
 * Fixed incorrect error messages being sent in case the server's system fails to open an area list or music list file.
 
 ### (4.2.4)
+* Enforced Python 3.6+ requirement on server launch.
+* Server owners running Python 3.6 will now be warned on server launch of pending deprecation of support for Python 3.6 with the upcoming major release of TsuserverDR.
 * Added /cid to get your (or other's) client ID.
 * Added /spectate to switch to spectator
 * Added /time_est
@@ -402,4 +404,4 @@
   - /shout (Alias for /scream)
   - /unsneak (Alias for /reveal)
   - /yell (Alias for /scream)
-* Added best effort support for Attorney Online 2.7
+* Added best-effort support for Attorney Online 2.7
