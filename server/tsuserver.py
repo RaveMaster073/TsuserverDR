@@ -25,7 +25,6 @@ import sys
 import traceback
 import urllib.request
 import warnings
-import yaml
 
 from server import logger
 from server.aoprotocol import AOProtocol
@@ -45,8 +44,8 @@ class TsuserverDR:
         self.release = 4
         self.major_version = 2
         self.minor_version = 4
-        self.segment_version = 'a12'
-        self.internal_version = 'm200428b'
+        self.segment_version = 'a13'
+        self.internal_version = 'm200430a'
         version_string = self.get_version_string()
         self.software = 'TsuserverDR {}'.format(version_string)
         self.version = 'TsuserverDR {} ({})'.format(version_string, self.internal_version)
@@ -555,7 +554,10 @@ class TsuserverDR:
             for item in specific_music_list:
                 prepared_music_list.append(item['category'])
                 for song in item['songs']:
-                    name, length = song['name'], song['length']
+                    if 'length' not in song:
+                        name, length = song['name'], -1
+                    else:
+                        name, length = song['name'], song['length']
 
                     # Check that length is a number, and if not, abort.
                     if not isinstance(length, (int, float)):

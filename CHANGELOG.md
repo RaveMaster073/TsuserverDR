@@ -384,6 +384,9 @@
 ### 200428a (4.2.3-post9)
 * Fixed incorrect error messages being sent in case the server's system fails to open an area list or music list file.
 
+### 200430a (4.2.3-post10)
+* Reverted backwards incompatible change that prevented music lists that did not list length for a track (meaning they did not want them to be looped) from being loaded.
+
 ### (4.2.4)
 * Enforced Python 3.6+ requirement on server launch.
 * Server owners running Python 3.6 will now be warned on server launch of pending deprecation of support for Python 3.6 with the upcoming major release of TsuserverDR.
