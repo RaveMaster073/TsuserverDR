@@ -25,7 +25,6 @@ all necessary actions in order to simulate different rooms.
 
 import asyncio
 import time
-import yaml
 
 from server import logger
 from server.constants import Constants
@@ -879,27 +878,27 @@ class AreaManager:
             areas = Constants.yaml_load(chars)
 
         def_param = {
-            'bglock': False,
-            'evidence_mod': 'FFA',
-            'locking_allowed': False,
-            'iniswap_allowed': False,
-            'rp_getarea_allowed': True,
-            'rp_getareas_allowed': True,
-            'rollp_allowed': True,
-            'reachable_areas': '<ALL>',
-            'change_reachability_allowed': True,
-            'gm_iclock_allowed': True,
             'afk_delay': 0,
             'afk_sendto': 0,
-            'lobby_area': False,
-            'private_area': False,
-            'scream_range': '',
-            'restricted_chars': '',
-            'default_description': self.server.config['default_area_description'],
-            'has_lights': True,
+            'bglock': False,
+            'bullet': True,
             'cbg_allowed': False,
+            'change_reachability_allowed': True,
+            'default_description': self.server.config['default_area_description'],
+            'evidence_mod': 'FFA',
+            'gm_iclock_allowed': True,
+            'has_lights': True,
+            'iniswap_allowed': False,
+            'lobby_area': False,
+            'locking_allowed': False,
+            'private_area': False,
+            'reachable_areas': '<ALL>',
+            'restricted_chars': '',
+            'rollp_allowed': True,
+            'rp_getarea_allowed': True,
+            'rp_getareas_allowed': True,
+            'scream_range': '',
             'song_switch_allowed': False,
-            'bullet': True
             }
 
         # Create the areas
