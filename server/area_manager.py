@@ -520,7 +520,7 @@ class AreaManager:
             else:
                 if self.background != self.server.config['blackout_background']:
                     self.background_backup = self.background
-                intended_background = self.server.config['blackout_background']
+                intended_background = self.background
 
             self.lights = new_lights
             self.change_background(intended_background, validate=False) # Allow restoring custom bg.
