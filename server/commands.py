@@ -202,8 +202,16 @@ def ooc_cmd_area_list(client: ClientManager.Client, arg: str):
             new_area_file = 'config/area_lists/{}.yaml'.format(arg)
             client.server.area_manager.load_areas(area_list_file=new_area_file)
         except ServerError as exc:
-            if exc.code == 'FileNotFound':
+            try:
+                code = exc.code
+            except AttributeError:
+                code = None
+
+            if code == 'FileNotFound':
                 raise ArgumentError('Could not find the area list file `{}`.'.format(new_area_file))
+            elif code == 'OSError':
+                raise ArgumentError('Unable to open area list file `{}`: `{}`.'
+                                    .format(new_area_file, exc.message))
             raise # Weird exception, reraise it
         except AreaError as exc:
             raise ArgumentError('The area list {} returned the following error when loading: `{}`.'
@@ -2975,22 +2983,25 @@ def ooc_cmd_look_set(client: ClientManager.Client, arg: str):
     if len(arg) == 0:
         client.area.description = client.area.default_description
         client.send_ooc('Reset the area description to its original value.')
+        client.send_ooc_others('(X) {} reset the area description of your area to its original '
+                               'value.'.format(client.name), is_zstaff_flex=True, in_area=True)
         client.send_ooc_others('(X) {} reset the area description of area {} to its original value.'
-                               .format(client.name, client.area.name), is_zstaff_flex=True)
+                               .format(client.name, client.area.name), is_zstaff_flex=True,
+                               in_area=False)
         logger.log_server('[{}][{}]Reset the area description in {}.'
                           .format(client.area.id, client.get_char_name(), client.area.name), client)
 
     else:
         client.area.description = arg
-        client.send_ooc('Updated the area descriptions to {}'.format(arg))
-        client.send_ooc_others('(X) {} set the area descriptions of area {} to {}.'
+        client.send_ooc('Updated the area descriptions to `{}`.'.format(arg))
+        client.send_ooc_others('(X) {} set the area description of your area to `{}`.'
+                               .format(client.area.name, client.area.description),
+                               is_zstaff_flex=True, in_area=True)
+        client.send_ooc_others('(X) {} set the area descriptions of area {} to `{}`.'
                                .format(client.name, client.area.name, client.area.description),
-                               is_zstaff_flex=True)
+                               is_zstaff_flex=True, in_area=False)
         logger.log_server('[{}][{}]Set the area descriptions to {}.'
                           .format(client.area.id, client.get_char_name(), arg), client)
-
-    client.send_ooc_others('The area description was updated to {}.'
-                           .format(client.area.description), is_zstaff_flex=True, in_area=True)
 
 def ooc_cmd_make_gm(client: ClientManager.Client, arg: str):
     """ (MOD AND CM ONLY)
@@ -3173,9 +3184,17 @@ def ooc_cmd_music_list(client: ClientManager.Client, arg: str):
             raise ArgumentError('The music list {} returned the following error when loading: `{}`.'
                                 .format(new_music_file, exc))
         except ServerError as exc:
-            if exc.code == 'FileNotFound':
+            try:
+                code = exc.code
+            except AttributeError:
+                code = None
+
+            if code == 'FileNotFound':
                 raise ArgumentError('Could not find the music list file `{}`.'
                                     .format(new_music_file))
+            elif code == 'OSError':
+                raise ArgumentError('Unable to open music list file `{}`: `{}`.'
+                                    .format(new_music_file, exc.message))
             raise # Weird exception, reraise it
 
         client.send_ooc('You have loaded the music list {}.'.format(arg))
@@ -3778,7 +3797,7 @@ def ooc_cmd_passage_restore(client: ClientManager.Client, arg: str):
         area.change_reachability_allowed = area.default_change_reachability_allowed
 
     if areas[0] == areas[1]:
-        client.send_ooc('Passages in this area have been restored to their original statue.')
+        client.send_ooc('Passages in this area have been restored to their original state.')
     else:
         client.send_ooc('Passages in areas {} through {} have been restored to their original '
                         'state.'.format(areas[0].name, areas[1].name))
