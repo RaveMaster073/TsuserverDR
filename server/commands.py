@@ -534,8 +534,9 @@ def ooc_cmd_blind(client: ClientManager.Client, arg: str):
     /blind 1            :: Unblinds client 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True)
-    target = Constants.parse_id(client, arg)
+    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
+    cm = client.server.client_manager
+    target, _, _ = cm.get_target_public(client, arg)
 
     status = {False: 'unblinded', True: 'blinded'}
     new_blind = not target.is_blind
@@ -579,7 +580,7 @@ def ooc_cmd_blockdj(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_bloodtrail(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Toggles a client by IPID leaving a blood trail wherever they go or not. OOC announcements are
+    Toggles a client by  leaving a blood trail wherever they go or not. OOC announcements are
     made to players joining an area regarding the existence of a blood trail and where it leads to.
     Turning off a player leaving a blood trail does not clean the blood in the area. For that,
     use /bloodtrail_clean.
@@ -592,12 +593,12 @@ def ooc_cmd_bloodtrail(client: ClientManager.Client, arg: str):
     <client_id>: Client identifier (number in brackets in /getarea)
 
     EXAMPLE
-    Assuming a player with client ID 0 and IPID 1234567890 starts as not being leaving a blood trail
+    Assuming a player with client ID 0 starts without leaving a blood trail
     /bloodtrail 0            :: This player will now leave a blood trail wherever they go.
     """
 
-    Constants.assert_command(client, arg, is_staff=True)
-    target = Constants.parse_id(client, arg)
+    Constants.assert_command(client, arg, is_staff=True, parameters'>0')
+    target, _, _ = client.server.client_manager.get_target_public(client, arg)
 
     status = {False: 'no longer', True: 'now'}
     status2 = {False: 'stop', True: 'start'}
@@ -1321,7 +1322,8 @@ def ooc_cmd_clock_cancel(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     try:
-        c = Constants.parse_id(client, arg)
+        cm - client.server.client_manager
+        c, _, _ = cm.get_target_public(client, arg)
     except ClientError:
         raise ArgumentError('Client {} is not online.'.format(arg))
 
@@ -1353,7 +1355,8 @@ def ooc_cmd_clock_pause(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     try:
-        c = Constants.parse_id(client, arg)
+        cm = client.server.client_manager
+        c, _, _ = cm.get_target_public(client, arg)
     except ClientError:
         raise ArgumentError('Client {} is not online.'.format(arg))
 
@@ -1392,7 +1395,8 @@ def ooc_cmd_clock_unpause(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     try:
-        c = Constants.parse_id(client, arg)
+        cm = client.server.client_manager
+        c, _, _ = cm.get_target_public(client, arg)
     except ClientError:
         raise ArgumentError('Client {} is not online.'.format(arg))
 
@@ -1460,12 +1464,11 @@ def ooc_cmd_cure(client: ClientManager.Client, arg: str):
     Assuming client 1 is blind, deafened and gagged and these are run immediately one after the other:
     /cure 1 b      :: Cures client 1 of blindness.
     /cure 1 Bd     :: Cures client 1 of deafedness (note they were not blind).
-    /cure 1 gDB    :: Cures client 1 of being gagged (noe they were neither deafened or blind).
+    /cure 1 gDB    :: Cures client 1 of being gagged (note they were neither deafened or blind).
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='=2')
-    raw_target, raw_effects = arg.split(' ')
-    target = Constants.parse_id(client, raw_target)
+    Constants.assert_command(client, arg, is_staff=True, parameters='>1')
+    target, _, raw_effects = client.server.client_manager.get_target_public(client, arg)
     effects = Constants.parse_effects(client, raw_effects)
 
     sorted_effects = sorted(effects, key=lambda effect: effect.name)
@@ -1533,8 +1536,8 @@ def ooc_cmd_deafen(client: ClientManager.Client, arg: str):
     /deafen 1            :: Undeafens client 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True)
-    target = Constants.parse_id(client, arg)
+    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
+    target, _, _ = client.server.client_manager.get_target_public(client, arg)
 
     status = {False: 'undeafened', True: 'deafened'}
     new_deaf = not target.is_deaf
@@ -1596,7 +1599,7 @@ def ooc_cmd_dicelog(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     # Obtain target's dicelog
-    target = Constants.parse_id(client, arg)
+    target = client.server.client_manager.get_target_public(client, arg)
     info = target.get_dicelog()
     client.send_ooc(info)
 
@@ -1607,7 +1610,7 @@ def ooc_cmd_dicelog_area(client: ClientManager.Client, arg: str):
     Returns an error if the identifier does not correspond to an area.
 
     SYNTAX
-    /dicelog
+    /dicelog_area
     /dicelog_area <target_area>
 
     PARAMETERS
@@ -1822,12 +1825,12 @@ def ooc_cmd_follow(client: ClientManager.Client, arg: str):
     /follow 1                     :: Starts following the player whose client ID is 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True)
+    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
 
     if client.party:
         raise PartyError('You cannot follow someone while in a party.')
 
-    c = Constants.parse_id(client, arg)
+    c, _, _ = client.server.client_manager.get_target_public(client, arg)
     client.follow_user(c)
     logger.log_server('{} began following {}.'
                       .format(client.get_char_name(), c.get_char_name()), client)
@@ -1874,8 +1877,8 @@ def ooc_cmd_gag(client: ClientManager.Client, arg: str):
     /gag 1            :: Ungags client 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True)
-    target = Constants.parse_id(client, arg)
+    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
+    target = client.server.client_manager.get_target_public(client, arg)
 
     status = {False: 'ungagged', True: 'gagged'}
     new_gagged = not target.is_gagged
@@ -3880,9 +3883,9 @@ def ooc_cmd_poison(client: ClientManager.Client, arg: str):
     /poison 1 Dg 15     :: Poisons client 1 with a poison that in 8 seconds will turn them gagged in 15 seconds (old deafened poison of 8 seconds remains)
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='=3')
-    raw_target, raw_effects, raw_length = arg.split(' ')
-    target = Constants.parse_id(client, raw_target)
+    Constants.assert_command(client, arg, is_staff=True, parameters='>2')
+    target, _, args = client.server.client_manager.get_target_public(client, arg)
+    raw_effects, raw_length = args.split(' ')
     effects = Constants.parse_effects(client, raw_effects)
     length = Constants.parse_time_length(raw_length)
 
