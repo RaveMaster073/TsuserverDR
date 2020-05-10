@@ -515,7 +515,7 @@ def ooc_cmd_bilock(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_blind(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Changes the blind status of a player by client ID.
+    Changes the blind status of a player by user ID.
     Blind players will receive no character sprites nor background with IC messages and cannot
     use "visual" commands such as /look, /getarea, etc.
     Immediately after blinding/unblinding, the target will receive sense-appropiate blood
@@ -523,10 +523,10 @@ def ooc_cmd_blind(client: ClientManager.Client, arg: str):
     Returns an error if the given identifier does not correspond to a user.
 
     SYNTAX
-    /blind <client_id>
+    /blind <user_id>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLES
     Assuming client 1 starts sighted...
@@ -534,10 +534,17 @@ def ooc_cmd_blind(client: ClientManager.Client, arg: str):
     /blind 1            :: Unblinds client 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
-    cm = client.server.client_manager
-    target, _, _ = cm.get_target_public(client, arg)
+    Constants.assert_command(client, arg, is_staff=True)
 
+    try:
+        target, _, _ = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        if not arg.isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(arg))
+        raise ClientError('No targets found.')
     status = {False: 'unblinded', True: 'blinded'}
     new_blind = not target.is_blind
 
@@ -580,26 +587,33 @@ def ooc_cmd_blockdj(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_bloodtrail(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Toggles a client by  leaving a blood trail wherever they go or not. OOC announcements are
+    Toggles a client by user ID leaving a blood trail wherever they go or not. OOC announcements are
     made to players joining an area regarding the existence of a blood trail and where it leads to.
     Turning off a player leaving a blood trail does not clean the blood in the area. For that,
     use /bloodtrail_clean.
     Returns an error if the given identifier does not correspond to a user.
 
     SYNTAX
-    /bloodtrail <client_id>
+    /bloodtrail <user_id>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLE
     Assuming a player with client ID 0 starts without leaving a blood trail
     /bloodtrail 0            :: This player will now leave a blood trail wherever they go.
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters'>0')
-    target, _, _ = client.server.client_manager.get_target_public(client, arg)
-
+    Constants.assert_command(client, arg, is_staff=True)
+    try:
+        target, _, _ = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        if not arg.isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(arg))
+        raise ClientError('No targets found.')
     status = {False: 'no longer', True: 'now'}
     status2 = {False: 'stop', True: 'start'}
     target.is_bleeding = not target.is_bleeding
@@ -1303,14 +1317,14 @@ def ooc_cmd_clock(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_clock_cancel(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Cancel the day cycle established by a player by client ID (or own if not given ID)
+    Cancel the day cycle established by a player by user ID (or own if not given ID)
     Returns an error if the given player has no associated active day cycle.
 
     SYNTAX
-    /clock_cancel {client_id}
+    /clock_cancel {user_id}
 
     OPTIONAL PARAMETERS
-    {client_id}: Client identifier (number in brackets in /getarea)
+    (user_id): Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLE
     /clock_cancel 0         :: Cancels the day cycle established by the player whose client ID is 0.
@@ -1322,8 +1336,7 @@ def ooc_cmd_clock_cancel(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     try:
-        cm - client.server.client_manager
-        c, _, _ = cm.get_target_public(client, arg)
+        c, _, _ = client.server.client_manager.get_target_public(client, arg)
     except ClientError:
         raise ArgumentError('Client {} is not online.'.format(arg))
 
@@ -1334,16 +1347,16 @@ def ooc_cmd_clock_cancel(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_clock_pause(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Pauses the day cycle established by a player by client ID (or own if not given an ID).
+    Pauses the day cycle established by a player by user ID (or own if not given an ID).
     Requires /clock_unpause to undo.
     Returns an error if the given player has no associated active day cycle, or if their day cycle
     is already paused.
 
     SYNTAX
-    /clock_pause {client_id}
+    /clock_pause {user_id}
 
     OPTIONAL PARAMETERS
-    {client_id}: Client identifier (number in brackets in /getarea)
+    (user_id): Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLE
     /clock_pause 0         :: Pauses the day cycle established by the player whose client ID is 0.
@@ -1355,8 +1368,7 @@ def ooc_cmd_clock_pause(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     try:
-        cm = client.server.client_manager
-        c, _, _ = cm.get_target_public(client, arg)
+        c, _, _ = client.server.client_manager.get_target_public(client, arg)
     except ClientError:
         raise ArgumentError('Client {} is not online.'.format(arg))
 
@@ -1374,16 +1386,16 @@ def ooc_cmd_clock_pause(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_clock_unpause(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Unpauses the day cycle established by a player by client ID (or own if not given an ID).
+    Unpauses the day cycle established by a player by user ID (or own if not given an ID).
     Requires /clock_pause to undo.
     Returns an error if the given player has no associated active day cycle, or if their day cycle
     is already unpaused.
 
     SYNTAX
-    /clock_unpause {client_id}
+    /clock_unpause {user_id}
 
     OPTIONAL PARAMETERS
-    {client_id}: Client identifier (number in brackets in /getarea)
+    (user_id): Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLE
     /clock_unpause 0         :: Unpauses the day cycle established by the player whose client ID is 0.
@@ -1395,8 +1407,7 @@ def ooc_cmd_clock_unpause(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     try:
-        cm = client.server.client_manager
-        c, _, _ = cm.get_target_public(client, arg)
+        c, _, _ = client.server.client_manager.get_target_public(client, arg)
     except ClientError:
         raise ArgumentError('Client {} is not online.'.format(arg))
 
@@ -1453,10 +1464,10 @@ def ooc_cmd_cure(client: ClientManager.Client, arg: str):
     contain an unrecognized/repeated character.
 
     SYNTAX
-    /cure <client_id> <effects>
+    /cure <user_id> <effects>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
     <effects>: Effects to cure (a string consisting of non-case-sensitive 'b', 'd', and/or 'g' in
     some order corresponding to the initials of the supported effects)
 
@@ -1467,8 +1478,21 @@ def ooc_cmd_cure(client: ClientManager.Client, arg: str):
     /cure 1 gDB    :: Cures client 1 of being gagged (note they were neither deafened or blind).
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='>1')
-    target, _, raw_effects = client.server.client_manager.get_target_public(client, arg)
+    Constants.assert_command(client, arg, is_staff=True)
+    try:
+        target, match, raw_effects = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        Constants.assert_command(client, arg, parameters='=2')
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        args = arg.split(' ')
+        if not args[0].isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(args[0]))
+        raise ClientError('No targets found.')
+    # check argument count, in case of false positive id matches found by get_target_public
+    args = arg.replace(match, str(target.id))
+    Constants.assert_command(client, arg, parameters='=2')
     effects = Constants.parse_effects(client, raw_effects)
 
     sorted_effects = sorted(effects, key=lambda effect: effect.name)
@@ -1517,7 +1541,7 @@ def ooc_cmd_currentmusic(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_deafen(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Changes the deafened status of a player by client ID.
+    Changes the deafened status of a player by user ID.
     Deaf players will be unable to read IC messages properly or receive other audio cues from
     commands such as /knock, /scream, etc.
     Immediately after deafening/undeafening, the target will receive sense-appropiate blood
@@ -1525,10 +1549,10 @@ def ooc_cmd_deafen(client: ClientManager.Client, arg: str):
     Returns an error if the given identifier does not correspond to a user.
 
     SYNTAX
-    /deafen <client_id>
+    /deafen <user_id>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLES
     Assuming client 1 starts hearing...
@@ -1536,8 +1560,16 @@ def ooc_cmd_deafen(client: ClientManager.Client, arg: str):
     /deafen 1            :: Undeafens client 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
-    target, _, _ = client.server.client_manager.get_target_public(client, arg)
+    Constants.assert_command(client, arg, is_staff=True)
+    try:
+        target, _, _ = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        if not arg.isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(arg))
+        raise ClientError('No targets found.')
 
     status = {False: 'undeafened', True: 'deafened'}
     new_deaf = not target.is_deaf
@@ -1579,15 +1611,14 @@ def ooc_cmd_defaultarea(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_dicelog(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Obtains the last 20 roll resuls from the target by ID or the user if not given any.
+    Obtains the last 20 roll resuls from the target by user ID or the user if not given any.
     Returns an error if the identifier does not correspond to a user.
 
     SYNTAX
-    /dicelog
-    /dicelog <client_id>
+    /dicelog (user_id)
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    (user_id): Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLES
     /dicelog        :: Returns the user's last 20 rolls
@@ -1599,7 +1630,15 @@ def ooc_cmd_dicelog(client: ClientManager.Client, arg: str):
         arg = str(client.id)
 
     # Obtain target's dicelog
-    target = client.server.client_manager.get_target_public(client, arg)
+    try:
+        target, _, _ = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        if not arg.isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(arg))
+        raise ClientError('No targets found.')
     info = target.get_dicelog()
     client.send_ooc(info)
 
@@ -1810,27 +1849,35 @@ def ooc_cmd_files_set(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_follow(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Starts following a player by their client ID. When the target area moves area, you will follow
+    Starts following a player by their user ID. When the target area moves area, you will follow
     them automatically except if disallowed by the new area.
     Requires /unfollow to undo.
     Returns an error if the client is part of a party.
 
     SYNTAX
-    /follow <client_id>
+    /follow <user_id>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLE
     /follow 1                     :: Starts following the player whose client ID is 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
+    Constants.assert_command(client, arg, is_staff=True)
 
     if client.party:
         raise PartyError('You cannot follow someone while in a party.')
 
-    c, _, _ = client.server.client_manager.get_target_public(client, arg)
+    try:
+        c, _, _ = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        if not arg.isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(arg))
+        raise ClientError('No targets found.')
     client.follow_user(c)
     logger.log_server('{} began following {}.'
                       .format(client.get_char_name(), c.get_char_name()), client)
@@ -1861,15 +1908,15 @@ def ooc_cmd_g(client: ClientManager.Client, arg: str):
 
 def ooc_cmd_gag(client: ClientManager.Client, arg: str):
     """ (STAFF ONLY)
-    Changes the gagged status of a player by client ID.
+    Changes the gagged status of a player by user ID.
     Gagged players will be unable to talk IC properly or use other talking features such as /scream.
     Returns an error if the given identifier does not correspond to a user.
 
     SYNTAX
-    /gag <client_id>
+    /gag <user_id>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
 
     EXAMPLES
     Assuming client 1 starts hearing...
@@ -1877,8 +1924,16 @@ def ooc_cmd_gag(client: ClientManager.Client, arg: str):
     /gag 1            :: Ungags client 1
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='>0')
-    target = client.server.client_manager.get_target_public(client, arg)
+    Constants.assert_command(client, arg, is_staff=True)
+    try:
+        target, _, _ = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        if not arg.isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(arg))
+        raise ClientError('No targets found.')
 
     status = {False: 'ungagged', True: 'gagged'}
     new_gagged = not target.is_gagged
@@ -3868,10 +3923,10 @@ def ooc_cmd_poison(client: ClientManager.Client, arg: str):
     repeated character.
 
     SYNTAX
-    /poison <client_id> <effects> <length>
+    /poison <user_id> <effects> <length>
 
     PARAMETERS
-    <client_id>: Client identifier (number in brackets in /getarea)
+    <user_id>: Either the client ID (number in brackets in /getarea), character name, edited-to character, custom showname or OOC name of the intended recipient.
     <effects>: Effects to apply with the current poison (a string consisting of non-case-sensitive
     'b', 'd', and/or 'g' in some order corresponding to the initials of the supported effects)
     <length>: Time to wait before the effects take place (in seconds)
@@ -3883,9 +3938,22 @@ def ooc_cmd_poison(client: ClientManager.Client, arg: str):
     /poison 1 Dg 15     :: Poisons client 1 with a poison that in 8 seconds will turn them gagged in 15 seconds (old deafened poison of 8 seconds remains)
     """
 
-    Constants.assert_command(client, arg, is_staff=True, parameters='>2')
-    target, _, args = client.server.client_manager.get_target_public(client, arg)
-    raw_effects, raw_length = args.split(' ')
+    Constants.assert_command(client, arg, is_staff=True)
+    try:
+        target, match, raw_effects = client.server.client_manager.get_target_public(client, arg)
+    except ClientError:
+        # emulate original parse_id error messages
+        Constants.assert_command(client, arg, parameters='=3')
+        if not arg:
+            raise ArgumentError('Expected client ID.')
+        args = arg.split(' ')
+        if not args[0].isdigit():
+            raise ArgumentError('`{}` does not look like a valid client ID.'.format(args[0]))
+        raise ClientError('No targets found.')
+    # check argument count, in case of false positive id matches found by get_target_public
+    args = arg.replace(match, str(target.id))
+    Constants.assert_command(client, args, parameters='=3')
+    _, raw_effects, raw_length = args.split(' ')
     effects = Constants.parse_effects(client, raw_effects)
     length = Constants.parse_time_length(raw_length)
 
