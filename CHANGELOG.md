@@ -408,3 +408,4 @@
   - /unsneak (Alias for /reveal)
   - /yell (Alias for /scream)
 * Added best-effort support for Attorney Online 2.7
+* Fix /lights not turning lights back on if the background wasn't changed
