@@ -387,6 +387,9 @@
 ### 200430a (4.2.3-post10)
 * Reverted backwards incompatible change that prevented music lists that did not list length for a track (meaning they did not want them to be looped) from being loaded.
 
+### 200503a (4.2.3-post11)
+* Fixed /lights not turning lights back on if the background wasn't changed
+
 ### (4.2.4)
 * Enforced Python 3.6+ requirement on server launch.
 * Server owners running Python 3.6 will now be warned on server launch of pending deprecation of support for Python 3.6 with the upcoming major release of TsuserverDR.
@@ -408,4 +411,3 @@
   - /unsneak (Alias for /reveal)
   - /yell (Alias for /scream)
 * Added best-effort support for Attorney Online 2.7
-* Fix /lights not turning lights back on if the background wasn't changed
