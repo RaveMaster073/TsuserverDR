@@ -408,15 +408,3 @@
   - /unsneak (Alias for /reveal)
   - /yell (Alias for /scream)
 * Added best-effort support for Attorney Online 2.7
-* The following commands can now take character name, edited-to character, showname or OOC name as identifiers, provided the target is in the same area:
-  - /blind
-  - /bloodtrail
-  - /clock_cancel
-  - /clock_pause
-  - /clock_unpause
-  - /cure
-  - /deafen
-  - /dicelog
-  - /follow
-  - /gag
-  - /poison 
